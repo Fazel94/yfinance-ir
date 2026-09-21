@@ -83,6 +83,26 @@ def test_cash_adjustment_is_a_dividend_and_a_share_change_is_a_split(api):
     assert cash.splits.empty
 
 
+def test_a_share_change_without_an_adjust_row_is_a_bonus_issue(api):
+    # TSETMC's adjust list omits most capital increases; 100 -> 150 shares registered on
+    # 2023-12-30 (a halted, bar-less day) must scale every earlier bar by 100/150 and land
+    # the split marker on the next bar.
+    ticker = _folad(
+        api,
+        adjust=[],
+        shares=[{"dEven": 20231230, "numberOfShareOld": 100, "numberOfShareNew": 150}],
+    )
+
+    frame = ticker.history(period="max")
+
+    assert ticker.dividends.empty
+    assert ticker.splits.loc[pd.Timestamp("2023-12-30")] == pytest.approx(1.5)
+    assert frame.loc["2023-12-27", "Close"] == pytest.approx(110 * 100 / 150)
+    assert frame.loc["2024-01-01", "Close"] == pytest.approx(60.0)
+    assert frame.loc["2024-01-01", "Stock Splits"] == pytest.approx(1.5)
+    assert frame["Stock Splits"].sum() == pytest.approx(1.5)
+
+
 def test_actions_land_on_the_bar_of_their_ex_date(api):
     frame = _folad(api).history(period="max")
 

@@ -11,6 +11,12 @@ The per-share cash difference (``unadjusted - adjusted``) is reported as ``Divid
 on the ex-date, except when a share-count change lands within +/-3 days of the same
 event, in which case it is a capital increase and becomes ``Stock Splits``
 (``numberOfShareNew / numberOfShareOld``).
+
+TSETMC's adjust list omits most capital increases (for فولاد it holds 23 dividend rows
+and one 2019 increase while the share count went 209B -> 1935B in 2020-2026), so every
+``Instrument/GetInstrumentShareChange`` row without an adjust row within +/-3 days is
+treated as a bonus issue: ``Stock Splits = new / old`` on its date and bars before it
+multiplied by ``old / new``. Rights issues paid in cash are therefore over-adjusted.
 """
 
 import datetime as _dt
@@ -198,21 +204,14 @@ def _adjust_events(session: requests.Session, ins_code: str) -> List[Tuple[_dt.d
     return events
 
 
-def fetch_actions(
-    session: requests.Session, instrument: Instrument
-) -> Tuple[pd.Series, pd.Series]:
-    """``(dividends, splits)`` indexed by ex-date."""
-    if not instrument.is_tsetmc or instrument.kind == "INDEX":
-        return _EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy()
-
-    events = _adjust_events(session, instrument.ins_code)
+def _share_events(session: requests.Session, ins_code: str) -> List[Tuple[_dt.date, float, float]]:
+    """``(date, shares_old, shares_new)`` oldest first, changes only."""
     try:
-        share_rows = tsetmc.share_change(session, instrument.ins_code) or []
+        rows = tsetmc.share_change(session, ins_code) or []
     except DataUnavailable:
-        share_rows = []
-
-    share_events = []
-    for row in share_rows:
+        return []
+    events = []
+    for row in rows:
         try:
             day = deven_to_date(row["dEven"])
             old = float(row["numberOfShareOld"])
@@ -220,30 +219,83 @@ def fetch_actions(
         except (KeyError, ValueError, TypeError):
             continue
         if old > 0 and new > 0 and new != old:
-            share_events.append((day, new / old))
+            events.append((day, old, new))
+    events.sort(key=lambda e: e[0])
+    return events
 
+
+def _corporate_events(
+    session: requests.Session, ins_code: str
+) -> Tuple[List[Tuple[_dt.date, float]], pd.Series, pd.Series]:
+    """``(price_ratios, dividends, splits)`` for one TSETMC instrument.
+
+    ``price_ratios`` is ``(ex_date, factor)`` oldest first, one per event; every bar
+    strictly before ``ex_date`` is multiplied by ``factor``. A TSETMC adjust row gives
+    ``adjusted / unadjusted``. A share change that TSETMC did not adjust for (its list
+    covers dividends and little else) is taken as a bonus issue: ``old / new``.
+    """
+    adjust = _adjust_events(session, ins_code)
+    shares = _share_events(session, ins_code)
+
+    ratios: List[Tuple[_dt.date, float]] = []
     dividends, splits = {}, {}
-    for day, adjusted, unadjusted in events:
-        match = next(
-            (ratio for sday, ratio in share_events if abs((sday - day).days) <= 3), None
+    matched = set()
+    for day, adjusted, unadjusted in adjust:
+        ratios.append((day, adjusted / unadjusted))
+        index = next(
+            (
+                i
+                for i, (sday, _, _) in enumerate(shares)
+                if i not in matched and abs((sday - day).days) <= 3
+            ),
+            None,
         )
-        if match is not None:
-            splits[pd.Timestamp(day)] = match
-        else:
+        if index is None:
             dividends[pd.Timestamp(day)] = unadjusted - adjusted
+        else:
+            matched.add(index)
+            _, old, new = shares[index]
+            splits[pd.Timestamp(day)] = new / old
+    for i, (day, old, new) in enumerate(shares):
+        if i in matched:
+            continue
+        splits[pd.Timestamp(day)] = new / old
+        ratios.append((day, old / new))
+    ratios.sort(key=lambda e: e[0])
 
-    dividend_series = pd.Series(dividends, dtype="float64", name="Dividends").sort_index()
-    split_series = pd.Series(splits, dtype="float64", name="Stock Splits").sort_index()
-    return dividend_series, split_series
+    return (
+        ratios,
+        pd.Series(dividends, dtype="float64", name="Dividends").sort_index(),
+        pd.Series(splits, dtype="float64", name="Stock Splits").sort_index(),
+    )
 
 
-def _adjust_factors(index: pd.DatetimeIndex, events) -> pd.Series:
-    """Factor for every bar: product of ``adjusted/unadjusted`` over all *later* events."""
+def fetch_actions(
+    session: requests.Session, instrument: Instrument
+) -> Tuple[pd.Series, pd.Series]:
+    """``(dividends, splits)`` indexed by ex-date."""
+    if not instrument.is_tsetmc or instrument.kind == "INDEX":
+        return _EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy()
+    _, dividends, splits = _corporate_events(session, instrument.ins_code)
+    return dividends, splits
+
+
+def _adjust_factors(index: pd.DatetimeIndex, ratios: List[Tuple[_dt.date, float]]) -> pd.Series:
+    """Factor for every bar: product of the ratios of all *later* events."""
     factors = pd.Series(1.0, index=index, dtype="float64")
-    for day, adjusted, unadjusted in events:
-        ratio = adjusted / unadjusted
+    for day, ratio in ratios:
         factors[index < pd.Timestamp(day)] *= ratio
     return factors
+
+
+def _on_next_bar(index: pd.DatetimeIndex, actions: pd.Series) -> pd.Series:
+    """``actions`` re-keyed to the first bar at or after each date; dates past the end drop."""
+    out = pd.Series(0.0, index=index, dtype="float64")
+    if len(actions):
+        positions = index.searchsorted(actions.index)
+        keep = positions < len(index)
+        out.iloc[positions[keep]] = actions.values[keep]
+    return out
 
 
 def history(
@@ -275,20 +327,14 @@ def history(
         empty = _empty_frame(extra + (["Adj Close"] if not auto_adjust else []))
         return empty
 
-    events = (
-        _adjust_events(session, instrument.ins_code)
-        if instrument.is_tsetmc and instrument.kind != "INDEX"
-        else []
-    )
-    dividends, splits = (
-        fetch_actions(session, instrument)
-        if instrument.is_tsetmc and instrument.kind != "INDEX"
-        else (_EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy())
-    )
+    if instrument.is_tsetmc and instrument.kind != "INDEX":
+        ratios, dividends, splits = _corporate_events(session, instrument.ins_code)
+    else:
+        ratios, dividends, splits = [], _EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy()
 
     price_columns = [c for c in ("Open", "High", "Low", "Close", "Last") if c in frame.columns]
-    if events:
-        factors = _adjust_factors(frame.index, events)
+    if ratios:
+        factors = _adjust_factors(frame.index, ratios)
         if auto_adjust:
             for column in price_columns:
                 frame[column] = frame[column] * factors
@@ -297,14 +343,10 @@ def history(
     elif not auto_adjust:
         frame["Adj Close"] = frame["Close"]
 
-    frame["Dividends"] = 0.0
-    frame["Stock Splits"] = 0.0
-    if len(dividends):
-        common = frame.index.intersection(dividends.index)
-        frame.loc[common, "Dividends"] = dividends.reindex(common).values
-    if len(splits):
-        common = frame.index.intersection(splits.index)
-        frame.loc[common, "Stock Splits"] = splits.reindex(common).values
+    # an ex-date is often a halted (bar-less) day, so an action lands on the first bar
+    # at or after it, where the adjusted price gap is visible
+    frame["Dividends"] = _on_next_bar(frame.index, dividends)
+    frame["Stock Splits"] = _on_next_bar(frame.index, splits)
 
     if start_date is not None:
         frame = frame[frame.index >= pd.Timestamp(start_date)]

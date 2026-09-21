@@ -35,6 +35,32 @@ yf.Ticker("CPI").history()              # SCI consumer price index, monthly
 yf.Ticker("BTC-IRT").history()          # Nobitex, needs the `crypto` extra
 ```
 
+### Example: فولاد in Rial, USD and real terms
+
+[`examples/real_returns.py`](examples/real_returns.py) prices فولاد in TGJU dollars and
+deflates it by the SCI CPI. Both series are forward-filled onto the stock's trading days.
+
+```python
+import pandas as pd
+
+folad = yf.Ticker("فولاد").history(period="5y")["Close"]
+usd = yf.Ticker("USD").history(period="5y")["Close"].reindex(folad.index, method="ffill")
+cpi = yf.Ticker("CPI").history(period="5y")["Close"].reindex(folad.index, method="ffill")
+
+frame = pd.DataFrame({"Rial": folad, "USD": folad / usd, "Real": folad / cpi * cpi.iloc[-1]})
+print(frame.iloc[-1] / frame.iloc[0] - 1)
+```
+
+Output on 2026-09-21:
+
+```
+فولاد 2021-09-25 -> 2026-09-21 (5.0y)
+        total annualised
+Rial  +228.1%     +26.9%
+USD    -60.8%     -17.1%
+Real   -52.0%     -13.7%
+```
+
 ## Symbols
 
 | You pass | Resolves to | Example |
@@ -76,7 +102,7 @@ in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 | Prices | TSETMC and TGJU in Rial; `*-IRT` crypto pairs in Toman |
 | Columns | `Open High Low Close Volume Dividends "Stock Splits"`, plus TSETMC `Last`, `Value`, `Count`; `auto_adjust=False` adds `Adj Close` |
 | Dates | Gregorian `DatetimeIndex`; `start`/`end` accept Gregorian, Jalali (`1403-01-01`), `dEven` ints, `date`/`datetime`; `end` exclusive |
-| Adjustment | Multiplicative factors from TSETMC `GetPriceAdjustList`; cash difference becomes `Dividends`, share-count changes become `Stock Splits` |
+| Adjustment | Dividend gaps from TSETMC `GetPriceAdjustList`; share-count changes it omits are bonus issues (`old / new`); markers land on the next bar |
 | Non-trading rows | Zero-volume calendar rows while a symbol is suspended are dropped |
 | Errors | `SymbolNotFound`, `BlockedError`, `RateLimitError`, `DataUnavailable`, all subclasses of `YFIRError` |
 
@@ -113,7 +139,7 @@ Reasons and endpoint details: [docs/data-sources.md](docs/data-sources.md).
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev,crypto]"
 .venv/bin/python -m ruff check .
-.venv/bin/python -m pytest                   # 64 offline tests, replayed fixtures
+.venv/bin/python -m pytest                   # 65 offline tests, replayed fixtures
 .venv/bin/python -m pytest -m live           # 9 smoke tests, needs an Iranian IP
 .venv/bin/python tests/capture_fixtures.py   # re-record tests/fixtures/
 ```

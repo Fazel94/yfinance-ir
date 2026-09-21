@@ -6,6 +6,16 @@ changes are named in the entry.
 
 ## Unreleased
 
+- Fixed: `history()` ignored capital increases that TSETMC's `GetPriceAdjustList` omits.
+  فولاد's share count rose 209B to 1,935B in 2020-2026 with one adjust row, so its
+  5-year adjusted return read -50% instead of +228%. Every `GetInstrumentShareChange`
+  row without an adjust row within ±3 days is now a bonus issue: `Stock Splits =
+  new / old` and earlier bars multiplied by `old / new`. Rights issues paid in cash are
+  over-adjusted; TSETMC does not distinguish them.
+- Changed: `Dividends` and `Stock Splits` land on the first bar at or after the ex-date
+  instead of being dropped when the ex-date has no bar.
+- Added: `examples/real_returns.py`, فولاد in Rial, TGJU USD and CPI-deflated terms.
+
 ## 2026.9.0 - 2026-09-21
 
 First release.

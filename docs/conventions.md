@@ -29,6 +29,17 @@ product of all later events' ratios. The cash difference becomes `Dividends` on 
 ex-date, unless a share-count change lands within ±3 days, which makes it a capital
 increase and produces `Stock Splits = numberOfShareNew / numberOfShareOld`.
 
+`GetPriceAdjustList` covers dividends and little else. For فولاد it holds 23 dividend
+rows and one 2019 capital increase, while `GetInstrumentShareChange` records the share
+count going 209B to 1,935B between 2020 and 2026. Every share change with no adjust row
+within ±3 days is therefore treated as a bonus issue: `Stock Splits = new / old` on its
+date and every earlier bar multiplied by `old / new`. That is exact for increases paid
+from retained earnings or reserves and over-adjusts a rights issue paid in cash, since
+TSETMC does not say which kind an increase was.
+
+An ex-date is usually a halted, bar-less day, so `Dividends` and `Stock Splits` land on
+the first bar at or after it; `Ticker.dividends` and `Ticker.splits` keep the raw dates.
+
 ## Non-trading rows
 
 TSETMC returns calendar rows with zero volume and zero trades while

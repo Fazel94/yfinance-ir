@@ -53,19 +53,14 @@ which installs and imports in a fresh 3.10 venv.
 - [x] README restructured; long passages moved to `docs/conventions.md` and
       `docs/data-sources.md`.
 
-## Before the first push
+## Published
 
-- [ ] Review the initial commit contents. The venvs are 240 MB+ of the tree and are
-      ignored, so confirm `git show --stat HEAD` lists only `yfinance_ir/`, `tests/`,
-      `docs/`, `.github/`, `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`,
-      `PUBLISH_CHECKLIST.md`, `LICENSE`, `pyproject.toml` and `.gitignore`.
-- [ ] `git push -u origin main`.
-- [ ] After the first push, confirm the CI badge turns green on the Actions page.
+- [x] Pushed `main` to `github.com/Fazel94/yfinance-ir` (62 files).
+- [x] First CI run (`35630922800`) green on 3.9, 3.10, 3.11, 3.12 and 3.13, which also
+      proves `requires-python = ">=3.9"`.
 
 ## CI
 
-- [ ] 3.9 and 3.13 are untested locally; the first CI run proves them. The annotations are
-      3.9-safe (no PEP 585 or PEP 604 syntax anywhere in `yfinance_ir/`).
 - [ ] Optional `release.yml`: build and publish on tag with PyPI Trusted Publishing, so
       no API token lives in repository secrets.
 - [ ] Optional `dependabot.yml` for `pip` and `github-actions`.

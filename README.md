@@ -8,14 +8,8 @@
 Codal (financial statements), TGJU (FX, gold, coins), the Statistical Centre of Iran (CPI)
 and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 
-> **Iranian IP required.** `cdn.tsetmc.com` drops foreign IPs; the request hangs instead of
-> returning an error. If `HTTP(S)_PROXY` points outside Iran, unset it or call
-> `yf.set_config(trust_env=False)`.
+> **Iranian IP required.** `cdn.tsetmc.com` drops foreign IPs.
 
-> **Not affiliated** with yfinance, Yahoo, TSETMC, Codal, TGJU or the Statistical Centre of
-> Iran. The package reads their public endpoints and copies the `yfinance` API shape. No
-> accuracy guarantee, not investment advice; each source's terms of use are your
-> responsibility.
 
 ## Install
 
@@ -23,8 +17,6 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 pip install yfinance-ir              # TSETMC + Codal + TGJU + CPI
 pip install "yfinance-ir[crypto]"    # adds BTC-IRT / ETH-USDT style pairs
 ```
-
-Python >= 3.9. Depends on `requests`, `pandas`, `numpy`, `jdatetime`, `openpyxl`.
 
 ## Quickstart
 
@@ -131,6 +123,11 @@ path in `yfinance_ir/sources/` fails a test instead of hitting the network.
 
 Versions are CalVer, `YYYY.M.MICRO`. [CHANGELOG.md](CHANGELOG.md) names breaking changes;
 the number does not encode them. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+> **Not affiliated** with yfinance, Yahoo, TSETMC, Codal, TGJU or the Statistical Centre of
+> Iran. The package reads their public endpoints and copies the `yfinance` API shape. No
+> accuracy guarantee, not investment advice; each source's terms of use are your
+> responsibility.
 
 ## License
 

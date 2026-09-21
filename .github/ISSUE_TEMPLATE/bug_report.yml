@@ -1,0 +1,41 @@
+name: Bug report
+description: Something returns wrong data, raises, or hangs
+body:
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network location
+      description: TSETMC drops non-Iranian IPs and the request hangs. Check before reporting a hang.
+      options:
+        - Iranian IP, no proxy
+        - Iranian IP through a proxy
+        - Outside Iran
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: yfinance-ir version
+      placeholder: python -c "import yfinance_ir; print(yfinance_ir.__version__)"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Code that reproduces it
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What happened
+      description: Full traceback or the wrong values.
+    validations:
+      required: true

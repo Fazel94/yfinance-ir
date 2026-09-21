@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yfinance-ir"
+dynamic = ["version"]
+description = "yfinance-style market data for Iranian markets (TSETMC, Codal, TGJU)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Kiyarash Fazeli", email = "caci96@gmail.com" }]
+keywords = ["tsetmc", "codal", "tgju", "iran", "bourse", "stocks", "finance"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "requests>=2.28",
+    "pandas>=1.5",
+    "numpy>=1.21",
+    "jdatetime>=4",
+    "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "responses", "ruff"]
+crypto = ["ccxt-ir>=4"]
+
+[project.urls]
+Homepage = "https://github.com/Fazel94/yfinance-ir"
+Repository = "https://github.com/Fazel94/yfinance-ir"
+Issues = "https://github.com/Fazel94/yfinance-ir/issues"
+Changelog = "https://github.com/Fazel94/yfinance-ir/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "yfinance_ir.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["yfinance_ir*"]
+
+[tool.setuptools.package-data]
+yfinance_ir = ["py.typed"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+markers = ["live: hits the real network (requires an Iranian IP)"]
+addopts = '-m "not live"'
+testpaths = ["tests"]

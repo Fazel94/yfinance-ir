@@ -103,6 +103,26 @@ def test_a_share_change_without_an_adjust_row_is_a_bonus_issue(api):
     assert frame["Stock Splits"].sum() == pytest.approx(1.5)
 
 
+def test_a_fund_unit_change_is_not_a_bonus_issue(api):
+    # ETF units are created and redeemed daily; آوند's count grew ~20x in 2022-2026 while
+    # its price went 10,000 -> 30,309. The share-change list must not touch fund prices.
+    api.search("آوند", [{"insCode": "333", "lVal18AFC": "آوند", "lVal30": "آوند"}])
+    api.identity("333", symbol="آوند", name="صندوق آوند", isin="IRT3AVNF0008",
+                 market="بازار ابزارهای نوین مالی فرابورس")
+    api.daily("333", BARS)
+    api.adjust("333", [])
+    api.share_change("333", [{"dEven": 20231230, "numberOfShareOld": 100, "numberOfShareNew": 620}])
+    ticker = Ticker("آوند")
+
+    frame = ticker.history(period="max")
+
+    assert ticker.instrument.kind == "ETF"
+    assert ticker.splits.empty
+    assert frame.loc["2023-12-27", "Close"] == pytest.approx(110.0)
+    assert frame["Stock Splits"].sum() == 0.0
+
+
+
 def test_actions_land_on_the_bar_of_their_ex_date(api):
     frame = _folad(api).history(period="max")
 

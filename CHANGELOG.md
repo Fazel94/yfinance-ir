@@ -15,6 +15,14 @@ changes are named in the entry.
 - Changed: `Dividends` and `Stock Splits` land on the first bar at or after the ex-date
   instead of being dropped when the ex-date has no bar.
 - Added: `examples/real_returns.py`, فولاد in Rial, TGJU USD and CPI-deflated terms.
+- Fixed: the bonus-issue inference above was applied to funds, whose unit count moves
+  with every creation and redemption. آوند's adjusted series showed a +520% day and a
+  156% CAGR against a raw 10,000 to 30,309 Rial (29%). `kind == "ETF"` instruments now
+  take only TSETMC's own adjust rows.
+- Added: `examples/cookbook.ipynb`, chapters 1, 2 and 7 of *Python for Finance Cookbook*
+  on TSETMC, Nobitex, TGJU and SCI data, with the stylised facts tested, returns restated
+  in CPI and dollar terms, idle cash held in آوند or USD, and آوند's yield as the
+  risk-free rate.
 
 ## 2026.9.0 - 2026-09-21
 

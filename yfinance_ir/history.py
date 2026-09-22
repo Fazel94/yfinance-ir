@@ -17,6 +17,9 @@ and one 2019 increase while the share count went 209B -> 1935B in 2020-2026), so
 ``Instrument/GetInstrumentShareChange`` row without an adjust row within +/-3 days is
 treated as a bonus issue: ``Stock Splits = new / old`` on its date and bars before it
 multiplied by ``old / new``. Rights issues paid in cash are therefore over-adjusted.
+Funds (``kind == "ETF"``) skip the share-change list entirely: their unit count moves
+with every creation and redemption (آوند went 10,000 -> 30,309 Rial in 2022-2026 while
+its unit count grew nearly 20x), so only TSETMC's own adjust rows apply to them.
 """
 
 import datetime as _dt
@@ -225,17 +228,19 @@ def _share_events(session: requests.Session, ins_code: str) -> List[Tuple[_dt.da
 
 
 def _corporate_events(
-    session: requests.Session, ins_code: str
+    session: requests.Session, ins_code: str, *, infer_bonus: bool = True
 ) -> Tuple[List[Tuple[_dt.date, float]], pd.Series, pd.Series]:
     """``(price_ratios, dividends, splits)`` for one TSETMC instrument.
 
     ``price_ratios`` is ``(ex_date, factor)`` oldest first, one per event; every bar
     strictly before ``ex_date`` is multiplied by ``factor``. A TSETMC adjust row gives
     ``adjusted / unadjusted``. A share change that TSETMC did not adjust for (its list
-    covers dividends and little else) is taken as a bonus issue: ``old / new``.
+    covers dividends and little else) is taken as a bonus issue: ``old / new``, unless
+    ``infer_bonus`` is false, which is the case for funds: an ETF's unit count moves with
+    every creation and redemption and says nothing about its price.
     """
     adjust = _adjust_events(session, ins_code)
-    shares = _share_events(session, ins_code)
+    shares = _share_events(session, ins_code) if infer_bonus else []
 
     ratios: List[Tuple[_dt.date, float]] = []
     dividends, splits = {}, {}
@@ -276,7 +281,9 @@ def fetch_actions(
     """``(dividends, splits)`` indexed by ex-date."""
     if not instrument.is_tsetmc or instrument.kind == "INDEX":
         return _EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy()
-    _, dividends, splits = _corporate_events(session, instrument.ins_code)
+    _, dividends, splits = _corporate_events(
+        session, instrument.ins_code, infer_bonus=instrument.kind != "ETF"
+    )
     return dividends, splits
 
 
@@ -328,7 +335,9 @@ def history(
         return empty
 
     if instrument.is_tsetmc and instrument.kind != "INDEX":
-        ratios, dividends, splits = _corporate_events(session, instrument.ins_code)
+        ratios, dividends, splits = _corporate_events(
+            session, instrument.ins_code, infer_bonus=instrument.kind != "ETF"
+        )
     else:
         ratios, dividends, splits = [], _EMPTY_ACTIONS[0].copy(), _EMPTY_ACTIONS[1].copy()
 

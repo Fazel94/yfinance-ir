@@ -61,6 +61,12 @@ USD    -60.8%     -17.1%
 Real   -52.0%     -13.7%
 ```
 
+[examples/cookbook.ipynb](examples/cookbook.ipynb) runs the recipes of chapters 1, 2 and 7
+of *Python for Finance Cookbook* (returns, CPI deflation, outliers, stylised facts,
+SMA/Bollinger/RSI backtests with backtrader, 1/n portfolio, Monte Carlo efficient frontier)
+on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
+`pip install "yfinance-ir[crypto,notebook]"`.
+
 ## Symbols
 
 | You pass | Resolves to | Example |

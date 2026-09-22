@@ -35,6 +35,14 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest", "responses", "ruff"]
 crypto = ["ccxt-ir>=4"]
+notebook = [
+    "matplotlib>=3.8",
+    "scipy>=1.11",
+    "statsmodels>=0.14",
+    "backtrader>=1.9.78",
+    "ipykernel",
+    "nbconvert",
+]
 
 [project.urls]
 Homepage = "https://github.com/Fazel94/yfinance-ir"

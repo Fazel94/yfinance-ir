@@ -80,3 +80,11 @@ which installs and imports in a fresh 3.10 venv.
 - [x] `pytest -m live` passed on 2026-09-24 from an Iranian IP.
 - [x] Tagged `v2026.9.0` (`a2e3378`, no GitHub Release) and `v2026.9.1`; the `v2026.9.1` GitHub Release carries the wheel and sdist.
 - [ ] PyPI upload deferred; the upload options are in `TODO.md`.
+
+## Release 2026.9.2 (GitHub only)
+
+- [x] `ruff check .` clean; `python -m pytest` 95 passed locally (3.11.12 with pandas 3.0.6, 3.10.12 with pandas 2.3.3) and in CI on 3.9 to 3.13.
+- [x] `python -m build` and `twine check` clean; the wheel installs in a fresh venv, imports, and fetches TGJU `USD`, فولاد's cash flow, اهرم's option chain and فولاد's 1h bars.
+- [x] `pytest -m live` 12 passed on 2026-09-24 from an Iranian IP. The market was closed (Thursday), so intraday bars of a running session are still unobserved.
+- [x] Tagged `v2026.9.2` (`5ab6fd5`); the GitHub Release carries the wheel and sdist.
+- [ ] PyPI upload deferred; the upload options are in `TODO.md`.

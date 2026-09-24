@@ -24,7 +24,7 @@ from .ticker import Ticker, Tickers
 _logging.getLogger("yfinance_ir").addHandler(_logging.NullHandler())
 
 #: CalVer, YYYY.M.MICRO
-__version__ = "2026.9.0"
+__version__ = "2026.9.1"
 
 __all__ = [
     "Ticker",

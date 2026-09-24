@@ -14,9 +14,11 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 ## Install
 
 ```bash
-pip install yfinance-ir              # TSETMC + Codal + TGJU + CPI
-pip install "yfinance-ir[crypto]"    # adds BTC-IRT / ETH-USDT style pairs
+pip install "yfinance-ir @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"          # TSETMC + Codal + TGJU + CPI
+pip install "yfinance-ir[crypto] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"  # adds BTC-IRT / ETH-USDT style pairs
 ```
+
+Not on PyPI yet: install from a release tag. Each [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) also carries the wheel and sdist.
 
 ## Quickstart
 
@@ -65,7 +67,7 @@ Real   -52.0%     -13.7%
 of *Python for Finance Cookbook* (returns, CPI deflation, outliers, stylised facts,
 SMA/Bollinger/RSI backtests with backtrader, 1/n portfolio, Monte Carlo efficient frontier)
 on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
-`pip install "yfinance-ir[crypto,notebook]"`.
+`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"`.
 
 ## Symbols
 
@@ -145,7 +147,7 @@ Reasons and endpoint details: [docs/data-sources.md](docs/data-sources.md).
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev,crypto]"
 .venv/bin/python -m ruff check .
-.venv/bin/python -m pytest                   # 65 offline tests, replayed fixtures
+.venv/bin/python -m pytest                   # 66 offline tests, replayed fixtures
 .venv/bin/python -m pytest -m live           # 9 smoke tests, needs an Iranian IP
 .venv/bin/python tests/capture_fixtures.py   # re-record tests/fixtures/
 ```

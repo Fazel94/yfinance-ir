@@ -4,7 +4,7 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
-## Unreleased
+## 2026.9.1 - 2026-09-24
 
 - Fixed: `history()` ignored capital increases that TSETMC's `GetPriceAdjustList` omits.
   فولاد's share count rose 209B to 1,935B in 2020-2026 with one adjust row, so its

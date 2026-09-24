@@ -14,8 +14,8 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 ## Install
 
 ```bash
-pip install "yfinance-ir @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"          # TSETMC + Codal + TGJU + CPI
-pip install "yfinance-ir[crypto] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"  # adds BTC-IRT / ETH-USDT style pairs
+pip install "yfinance-ir @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"          # TSETMC + Codal + TGJU + CPI
+pip install "yfinance-ir[crypto] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"  # adds BTC-IRT / ETH-USDT style pairs
 ```
 
 Not on PyPI yet: install from a release tag. Each [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) also carries the wheel and sdist.
@@ -70,7 +70,7 @@ Real   -52.0%     -13.7%
 of *Python for Finance Cookbook* (returns, CPI deflation, outliers, stylised facts,
 SMA/Bollinger/RSI backtests with backtrader, 1/n portfolio, Monte Carlo efficient frontier)
 on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
-`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.1"`.
+`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"`.
 
 ## Symbols
 

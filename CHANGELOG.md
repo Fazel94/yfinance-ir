@@ -4,7 +4,7 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
-## Unreleased
+## 2026.9.2 - 2026-09-24
 
 - Added: `Ticker.cashflow` and `Ticker.quarterly_cashflow` (aliases `cash_flow`,
   `quarterly_cash_flow`), Codal's صورت جریان های نقدی (`SheetId=9`).
@@ -19,8 +19,10 @@ changes are named in the entry.
   `NotImplementedError`.
 - Changed: `history(interval="1h")` on a TSETMC ticker returns hourly bars instead of
   raising `NotImplementedError`.
-- Changed: crypto `1h` bars are indexed by a tz-aware UTC `Datetime` index instead of a
-  naive UTC `Date` one, so `download()` can join them with TSETMC intraday bars.
+- Changed, breaking: crypto `1h` bars are indexed by a tz-aware UTC `Datetime` index
+  instead of a naive UTC `Date` one, so `download()` can join them with TSETMC intraday
+  bars. Code that compared the index with naive timestamps or read `index.name == "Date"`
+  needs updating.
 - Fixed: `download()` warned under pandas 3 (`Pandas4Warning`, an error under
   `-W error::DeprecationWarning`) when its symbols had different dates.
 

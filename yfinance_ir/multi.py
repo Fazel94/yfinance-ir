@@ -90,10 +90,12 @@ def download(
     if len(symbols) == 1:
         return frames[0][1]
 
+    # symbols trade on different days and hours; the union of their dates stays sorted
     merged = pd.concat(
         [frame for _, frame in frames],
         axis=1,
         keys=[symbol for symbol, _ in frames],
+        sort=True,
     )
     merged.columns.names = ["Ticker", "Price"]
     if group_by == "column":

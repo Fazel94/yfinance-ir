@@ -5,6 +5,7 @@ from conftest import load_fixture
 from yfinance_ir.exceptions import DataUnavailable
 from yfinance_ir.fundamentals import parse_datasource, statements
 from yfinance_ir.sources import codal
+from yfinance_ir.ticker import Ticker
 
 
 def _cell(row, column, value, *, period=None, group="Body"):
@@ -31,6 +32,37 @@ def test_real_codal_income_statement_parses_into_periods_and_line_items():
     revenue = [label for label in frame.index if "درآمد" in label or "فروش" in label]
     assert revenue, f"no revenue line among {list(frame.index)[:10]}"
     assert frame.loc[revenue[0]].dropna().abs().max() > 0
+
+
+def _operating_cash_lines(frame):
+    return [label for label in frame.index if "نقد" in label and "عملیاتی" in label]
+
+
+def test_real_codal_cash_flow_statement_parses_into_cash_lines():
+    frame = parse_datasource(load_fixture("codal_cashflow_folad.json"))
+
+    assert list(frame.columns) == sorted(frame.columns, reverse=True)
+    operating = _operating_cash_lines(frame)
+    assert operating, f"no operating cash line among {list(frame.index)[:10]}"
+    assert frame.loc[operating[0]].dropna().abs().max() > 0
+
+
+def test_cashflow_reads_the_cash_flow_sheet_not_the_income_statement(api):
+    url = "/Reports/Decision.aspx?LetterSerial=fy1404"
+    api.search("فولاد", [{"insCode": "222", "lVal18AFC": "فولاد", "lVal30": "فولاد"}])
+    api.identity("222", symbol="فولاد")
+    api.codal_search(
+        [{"Url": url, "PublishDateTime": "۱۴۰۵/۰۵/۰۷ ۲۰:۱۷:۰۱",
+          "Title": "صورت‌های مالی سال مالی منتهی به ۱۴۰۴/۱۲/۲۹"}]
+    )
+    api.codal_page(url, load_fixture("codal_income_folad.json"), sheet_id=codal.SHEET_INCOME)
+    api.codal_page(url, load_fixture("codal_cashflow_folad.json"), sheet_id=codal.SHEET_CASHFLOW)
+
+    ticker = Ticker("فولاد")
+
+    assert _operating_cash_lines(ticker.cashflow)
+    assert _operating_cash_lines(ticker.quarterly_cashflow)
+    assert not _operating_cash_lines(ticker.income_stmt)
 
 
 def test_percentage_columns_without_a_period_are_dropped():

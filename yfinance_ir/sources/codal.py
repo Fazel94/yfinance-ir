@@ -10,6 +10,9 @@ Verified live (2026-09-20):
   ``var datasource = {...};`` blob (``sheets[].tables[].cells[]``).
 * ``PublishDateTime``/``SentDateTime`` come back with **Persian digits**
   (``۱۴۰۵/۰۵/۰۷ ۲۰:۱۷:۰۱``) -- use :func:`fa_digits` before comparing or parsing them.
+* ``SheetId`` 0 is صورت وضعیت مالی, 1 صورت سود و زیان and 9 صورت جریان های نقدی (checked
+  2026-09-24 on فولاد, فملی and شپنا, annual and 3-month filings); 2-8 and 10-11 carry no
+  datasource.
 """
 
 import json
@@ -31,6 +34,7 @@ __all__ = [
     "LETTER_MONTHLY",
     "SHEET_BALANCE",
     "SHEET_INCOME",
+    "SHEET_CASHFLOW",
     "fa_digits",
     "letters",
     "datasource",
@@ -46,6 +50,7 @@ LETTER_FUND_PORTFOLIO = 8
 LETTER_MONTHLY = 58
 SHEET_BALANCE = 0
 SHEET_INCOME = 1
+SHEET_CASHFLOW = 9
 
 _PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
 _DATASOURCE_RE = re.compile(r"var\s+datasource\s*=\s*(\{.*?\})\s*;\s*$", re.S | re.M)

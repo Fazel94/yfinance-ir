@@ -22,6 +22,21 @@ Endpoint shapes verified live (2026-09-20, Iranian egress):
   ``Index/GetIndexB2History/{ins}`` -> ``indexB2[]`` with
   ``{dEven, xNivInuClMresIbs (close), xNivInuPbMresIbs (low), xNivInuPhMresIbs (high)}``,
   full history back to 2008.
+
+Verified live 2026-09-24:
+
+* ``Trade/GetTradeHistory/{ins}/{dEven}/false`` -> ``tradeHistory[]`` with
+  ``{nTran, hEven (HHMMSS), qTitTran, pTran, canceled}``, every trade of a past session
+  back to at least 2010, roughly newest first but not sorted. ``Trade/GetTrade/{ins}`` ->
+  ``trade[]`` is the same for the latest session. Both answer HTTP 500 or ``[]`` for
+  about a third of requests, so callers retry (see :mod:`yfinance_ir.intraday`).
+* ``Instrument/GetInstrumentOptionMarketWatch/{flow}`` -> ``instrumentOptMarketWatch[]``,
+  one row per call/put pair: shared ``uaInsCode``, ``strikePrice``, ``beginDate``,
+  ``endDate`` (``YYYYMMDD`` strings), ``contractSize`` and underlying quote
+  (``pDrCotVal_UA``, ``pClosing_UA``, ``priceYesterday_UA``), then per leg (``_C``/``_P``)
+  ``insCode``, ``lVal18AFC``, ``pDrCotVal``, ``pClosing``, ``priceYesterday``, ``pMeDem``/
+  ``qTitMeDem`` (bid), ``pMeOf``/``qTitMeOf`` (ask), ``qTotTran5J``, ``qTotCap``,
+  ``zTotTran`` and ``oP`` (open interest). Flow 0 is both exchanges.
 """
 
 from typing import Any, List
@@ -51,6 +66,9 @@ __all__ = [
     "index_history",
     "etf",
     "market_overview",
+    "trade_history",
+    "trades",
+    "option_market_watch",
 ]
 
 BASE = "https://cdn.tsetmc.com/api"
@@ -147,3 +165,18 @@ def etf(session: requests.Session, ins_code: str) -> dict:
 
 def market_overview(session: requests.Session, flow: int = 1) -> dict:
     return _call(session, f"/MarketData/GetMarketOverview/{flow}") or {}
+
+
+def trade_history(session: requests.Session, ins_code: str, deven: int) -> List[dict]:
+    """Every trade of the session on ``deven``, cancelled ones included."""
+    return _call(session, f"/Trade/GetTradeHistory/{ins_code}/{deven}/false") or []
+
+
+def trades(session: requests.Session, ins_code: str) -> List[dict]:
+    """Every trade of the latest session, same row shape as :func:`trade_history`."""
+    return _call(session, f"/Trade/GetTrade/{ins_code}") or []
+
+
+def option_market_watch(session: requests.Session, flow: int = 0) -> List[dict]:
+    """Every listed option pair; ``flow`` 0 = both exchanges, 1 = بورس, 2 = فرابورس."""
+    return _call(session, f"/Instrument/GetInstrumentOptionMarketWatch/{flow}") or []

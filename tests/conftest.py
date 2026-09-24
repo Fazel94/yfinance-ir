@@ -12,6 +12,7 @@ import sys
 
 import pytest
 import responses
+from responses import matchers
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -44,11 +45,11 @@ class Api:
     def __init__(self, mock):
         self.mock = mock
 
-    def _json(self, url, payload, status=200):
-        self.mock.add(responses.GET, url, json=payload, status=status)
+    def _json(self, url, payload, status=200, **kwargs):
+        self.mock.add(responses.GET, url, json=payload, status=status, **kwargs)
 
-    def _text(self, url, body, content_type="text/plain", status=200):
-        self.mock.add(responses.GET, url, body=body, status=status, content_type=content_type)
+    def _text(self, url, body, content_type="text/plain", status=200, **kwargs):
+        self.mock.add(responses.GET, url, body=body, status=status, content_type=content_type, **kwargs)
 
     # ---------------------------------------------------------------- tsetmc
     def search(self, query, rows):
@@ -95,6 +96,21 @@ class Api:
     def index_history(self, ins, rows):
         self._json(f"{tsetmc.BASE}/Index/GetIndexB2History/{ins}", {"indexB2": rows})
 
+    def trade_history(self, ins, deven, rows, status=200):
+        """Registered once per call; several registrations answer in order, the last repeats."""
+        self._json(
+            f"{tsetmc.BASE}/Trade/GetTradeHistory/{ins}/{deven}/false", {"tradeHistory": rows}, status=status
+        )
+
+    def trades(self, ins, rows, status=200):
+        self._json(f"{tsetmc.BASE}/Trade/GetTrade/{ins}", {"trade": rows}, status=status)
+
+    def option_watch(self, rows, flow=0):
+        self._json(
+            f"{tsetmc.BASE}/Instrument/GetInstrumentOptionMarketWatch/{flow}",
+            {"instrumentOptMarketWatch": rows},
+        )
+
     def equity(self, ins, *, symbol, rows, adjust=(), shares=(), name="نام شرکت"):
         """The full route set one TSETMC equity needs for search + history."""
         self.identity(ins, symbol=symbol, name=name)
@@ -117,11 +133,14 @@ class Api:
     def codal_search(self, letters, page=1):
         self._json(codal.SEARCH_URL, {"Total": len(letters), "Page": page, "Letters": letters})
 
-    def codal_page(self, url, datasource):
+    def codal_page(self, url, datasource, sheet_id=None):
         body = "<html><body><script>\nvar datasource = %s;\n</script></body></html>" % json.dumps(
             datasource, ensure_ascii=False
         )
-        self._text(codal.BASE + url.split("?")[0], body, content_type="text/html")
+        match = []
+        if sheet_id is not None:
+            match = [matchers.query_param_matcher({"SheetId": str(sheet_id)}, strict_match=False)]
+        self._text(codal.BASE + url.split("?")[0], body, content_type="text/html; charset=utf-8", match=match)
 
 
 @pytest.fixture

@@ -1,4 +1,7 @@
-"""Daily OHLCV history in the yfinance column layout, plus client-side price adjustment.
+"""OHLCV history in the yfinance column layout, plus client-side price adjustment.
+
+Daily bars come from each source's daily feed; TSETMC's intraday bars are rebuilt from its
+trades in :mod:`yfinance_ir.intraday` and adjusted here the same way.
 
 Adjustment model (TSETMC publishes no adjusted series):
 
@@ -29,13 +32,19 @@ import numpy as np
 import pandas as pd
 import requests
 
+from . import intraday as _intraday
 from ._dates import date_to_deven, deven_to_date, parse_date, period_start, to_jalali
 from .exceptions import DataUnavailable
 from .resolver import Instrument
 from .sources import sci, tgju, tsetmc
 
-#: CPI is published monthly, so `1d` (the default) and `1mo` both return the same frame
-_ALLOWED_INTERVALS = {"crypto": {"1d", "1h"}, "sci": {"1d", "1mo"}}
+#: CPI is published monthly, so `1d` (the default) and `1mo` both return the same frame;
+#: TSETMC's intraday bars are rebuilt from its trade feed (see :mod:`yfinance_ir.intraday`)
+_ALLOWED_INTERVALS = {
+    "crypto": {"1d", "1h"},
+    "sci": {"1d", "1mo"},
+    "tsetmc": {"1d", *_intraday.INTERVALS},
+}
 
 __all__ = ["fetch_daily", "fetch_actions", "history", "BASE_COLUMNS"]
 
@@ -305,6 +314,29 @@ def _on_next_bar(index: pd.DatetimeIndex, actions: pd.Series) -> pd.Series:
     return out
 
 
+def _on_session(actions: pd.Series, sessions: pd.DatetimeIndex, index: pd.DatetimeIndex) -> pd.Series:
+    """Intraday: ``actions`` re-keyed to the first session at or after each ex-date.
+
+    Only sessions from the first bar's day on are kept. The bars cover a window, not the
+    whole history, so an older action would otherwise land on the window's first bar.
+    """
+    if not len(actions):
+        return actions
+    positions = sessions.searchsorted(actions.index)
+    keep = positions < len(sessions)
+    landed = pd.Series(actions.values[keep], index=sessions[positions[keep]], dtype="float64")
+    return landed[landed.index >= index[0].normalize()]
+
+
+def _in_zone(frame: pd.DataFrame, zone: str) -> pd.DataFrame:
+    """Intraday bars are built on a naive clock (Tehran for TSETMC, UTC for crypto); label them.
+
+    Aware indexes let ``download()`` join a TSETMC and a crypto symbol on the same instants.
+    """
+    frame.index = pd.DatetimeIndex(frame.index.tz_localize(zone), name="Datetime")
+    return frame
+
+
 def history(
     session: requests.Session,
     instrument: Instrument,
@@ -321,18 +353,34 @@ def history(
         raise NotImplementedError(
             f"interval {interval!r} is not supported for a {instrument.source} instrument"
         )
+    intraday = instrument.is_tsetmc and interval != "1d"
+    if intraday and instrument.kind == "INDEX":
+        raise NotImplementedError(
+            f"interval {interval!r} is not supported for an index: TSETMC publishes no index trades"
+        )
 
     start_date = parse_date(start)
     end_date = parse_date(end)
     if start_date is None and end_date is None:
         start_date = period_start(period)
 
-    frame = fetch_daily(session, instrument, start=start_date, interval=interval)
+    zone = None
+    if intraday:
+        zone = _intraday.TIMEZONE
+    elif instrument.source == "crypto" and interval != "1d":
+        zone = "UTC"
+    sessions = None
+    if intraday:
+        frame, sessions = _intraday.bars(
+            session, instrument, start=start_date, end=end_date, interval=interval
+        )
+    else:
+        frame = fetch_daily(session, instrument, start=start_date, interval=interval)
     extra = [c for c in ("Last", "Value", "Count", "MoM", "YoY") if c in frame.columns]
 
     if frame.empty:
         empty = _empty_frame(extra + (["Adj Close"] if not auto_adjust else []))
-        return empty
+        return _in_zone(empty, zone) if zone else empty
 
     if instrument.is_tsetmc and instrument.kind != "INDEX":
         ratios, dividends, splits = _corporate_events(
@@ -354,6 +402,9 @@ def history(
 
     # an ex-date is often a halted (bar-less) day, so an action lands on the first bar
     # at or after it, where the adjusted price gap is visible
+    if sessions is not None:
+        dividends = _on_session(dividends, sessions, frame.index)
+        splits = _on_session(splits, sessions, frame.index)
     frame["Dividends"] = _on_next_bar(frame.index, dividends)
     frame["Stock Splits"] = _on_next_bar(frame.index, splits)
 
@@ -368,6 +419,8 @@ def history(
     columns += extra
     frame = frame[[c for c in columns if c in frame.columns]]
 
+    if zone:
+        frame = _in_zone(frame, zone)
     if jalali:
         frame = frame.copy()
         frame["JDate"] = [to_jalali(ts) for ts in frame.index]

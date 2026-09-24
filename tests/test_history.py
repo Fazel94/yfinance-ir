@@ -215,4 +215,4 @@ def test_tgju_falls_back_to_the_profile_chart_when_the_api_is_empty(api):
 
 def test_unsupported_interval_is_rejected(api):
     with pytest.raises(NotImplementedError):
-        _folad(api).history(interval="1h")
+        _folad(api).history(interval="1wk")

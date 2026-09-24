@@ -85,6 +85,43 @@ def test_codal_income_statement():
     assert frame.notna().any().any()
 
 
+def test_codal_cash_flow_statement():
+    frame = yf.Ticker("فولاد").cashflow
+
+    assert isinstance(frame.columns[0], pd.Timestamp)
+    assert any("نقد" in label and "عملیاتی" in label for label in frame.index)
+
+
+def test_option_chain_of_an_etf():
+    ticker = yf.Ticker("اهرم")
+
+    expirations = ticker.options
+    chain = ticker.option_chain()
+
+    assert expirations and list(expirations) == sorted(expirations)
+    assert len(chain.calls) == len(chain.puts) > 0
+    assert (chain.calls["strike"] > 0).all()
+    assert chain.underlying["regularMarketPrice"] > 0
+
+
+def test_intraday_bars_add_up_to_the_daily_bar():
+    ticker = yf.Ticker("فولاد")
+
+    bars = ticker.history(period="5d", interval="5m", auto_adjust=False)
+    daily = ticker.history(period="5d", auto_adjust=False)
+
+    assert str(bars.index.tz) == "Asia/Tehran"
+    clock = bars.index.hour * 100 + bars.index.minute
+    assert clock.min() >= 900 and clock.max() <= 1230
+    # a running session can be ahead of the daily list, so only finished days are compared
+    today = _dt.date.today()
+    volume = bars["Volume"].groupby(bars.index.date).sum()
+    volume = volume[[day < today for day in volume.index]]
+    finished = daily[daily.index.date < today]
+    assert list(volume.index) == list(finished.index.date)
+    assert list(volume) == list(finished["Volume"])
+
+
 def test_cpi_series_is_monthly_and_current():
     cpi = yf.Ticker("CPI")
 

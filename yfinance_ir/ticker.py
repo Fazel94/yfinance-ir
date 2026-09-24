@@ -1,6 +1,7 @@
 """``Ticker`` / ``Tickers`` -- the yfinance-shaped façade over TSETMC, Codal and TGJU."""
 
 import datetime as _dt
+from collections import namedtuple
 from typing import Dict, List, Optional, Sequence, Union
 
 import pandas as pd
@@ -8,10 +9,10 @@ import requests
 
 from . import fundamentals
 from . import history as _history
-from ._dates import deven_to_date
+from ._dates import deven_to_date, parse_date
 from ._http import new_session
 from .exceptions import DataUnavailable
-from .resolver import Instrument, resolve
+from .resolver import Instrument, normalize, resolve
 from .sources import codal, sci, tsetmc
 
 __all__ = ["Ticker", "Tickers"]
@@ -40,6 +41,30 @@ _CLIENT_TYPE_COLUMNS = [
     "institutional_sell_value",
 ]
 
+#: what :meth:`Ticker.option_chain` returns, named as in yfinance
+Options = namedtuple("Options", ["calls", "puts", "underlying"])
+
+_OPTION_COLUMNS = [
+    "contractSymbol",
+    "insCode",
+    "strike",
+    "lastPrice",
+    "close",
+    "previousClose",
+    "bid",
+    "ask",
+    "bidSize",
+    "askSize",
+    "change",
+    "percentChange",
+    "volume",
+    "value",
+    "openInterest",
+    "inTheMoney",
+    "contractSize",
+    "currency",
+]
+
 
 def _float(value) -> Optional[float]:
     try:
@@ -48,6 +73,48 @@ def _float(value) -> Optional[float]:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _expiration(row: dict) -> str:
+    return deven_to_date(row["endDate"]).isoformat()
+
+
+def _option_legs(rows: List[dict], leg: str, underlying: Optional[float]) -> pd.DataFrame:
+    """Calls (``leg="C"``) or puts (``"P"``) of market-watch pairs, one row per contract."""
+    records = []
+    for row in rows:
+        strike = _float(row.get("strikePrice"))
+        last = _float(row.get(f"pDrCotVal_{leg}"))
+        previous = _float(row.get(f"priceYesterday_{leg}"))
+        change = last - previous if last is not None and previous is not None else None
+        if underlying is None or strike is None:
+            in_the_money = False
+        else:
+            in_the_money = strike < underlying if leg == "C" else strike > underlying
+        records.append(
+            {
+                "contractSymbol": normalize(row.get(f"lVal18AFC_{leg}")),
+                "insCode": str(row.get(f"insCode_{leg}") or ""),
+                "strike": strike,
+                "lastPrice": last,
+                "close": _float(row.get(f"pClosing_{leg}")),
+                "previousClose": previous,
+                "bid": _float(row.get(f"pMeDem_{leg}")),
+                "ask": _float(row.get(f"pMeOf_{leg}")),
+                "bidSize": row.get(f"qTitMeDem_{leg}"),
+                "askSize": row.get(f"qTitMeOf_{leg}"),
+                "change": change,
+                "percentChange": change / previous * 100.0 if change is not None and previous else None,
+                "volume": row.get(f"qTotTran5J_{leg}"),
+                "value": _float(row.get(f"qTotCap_{leg}")),
+                "openInterest": row.get(f"oP_{leg}"),
+                "inTheMoney": in_the_money,
+                "contractSize": row.get("contractSize"),
+                "currency": "IRR",
+            }
+        )
+    frame = pd.DataFrame(records, columns=_OPTION_COLUMNS)
+    return frame.sort_values("strike", kind="stable").reset_index(drop=True)
 
 
 class Ticker:
@@ -60,6 +127,7 @@ class Ticker:
         self._info: Optional[dict] = None
         self._history: Dict[tuple, pd.DataFrame] = {}
         self._actions: Optional[tuple] = None
+        self._option_rows: Optional[List[dict]] = None
 
     def __repr__(self) -> str:
         return f"yfinance_ir.Ticker object <{self.instrument.symbol}>"
@@ -408,9 +476,65 @@ class Ticker:
     def quarterly_balance_sheet(self) -> pd.DataFrame:
         return self._statements(codal.SHEET_BALANCE, quarterly=True)
 
+    @property
+    def cashflow(self) -> pd.DataFrame:
+        return self._statements(codal.SHEET_CASHFLOW, quarterly=False)
+
+    cash_flow = cashflow
+
+    @property
+    def quarterly_cashflow(self) -> pd.DataFrame:
+        return self._statements(codal.SHEET_CASHFLOW, quarterly=True)
+
+    quarterly_cash_flow = quarterly_cashflow
+
     def monthly_activity(self, **kwargs) -> pd.DataFrame:
         self._require_company()
         return fundamentals.monthly_activity(self.session, self.instrument.symbol, **kwargs)
+
+    # ----------------------------------------------------------------- options
+
+    def _listed_options(self) -> List[dict]:
+        if self._option_rows is None:
+            self._require_tsetmc("options")
+            rows = tsetmc.option_market_watch(self.session, 0)
+            code = self.instrument.ins_code
+            self._option_rows = [row for row in rows if str(row.get("uaInsCode")) == code]
+        return self._option_rows
+
+    @property
+    def options(self) -> tuple:
+        """Expiration dates of the options written on this instrument, ``YYYY-MM-DD``, nearest first."""
+        return tuple(sorted({_expiration(row) for row in self._listed_options()}))
+
+    def option_chain(self, date=None) -> Options:
+        """Calls and puts expiring on ``date`` (Gregorian or Jalali); the nearest expiration by default."""
+        expirations = self.options
+        if not expirations:
+            raise DataUnavailable(0, "", f"no options are listed on {self.instrument.symbol}")
+        if date is None:
+            expiry = expirations[0]
+        else:
+            expiry = parse_date(date).isoformat()
+            if expiry not in expirations:
+                raise ValueError(
+                    f"Expiration `{date}` cannot be found. "
+                    f"Available expirations are: [{', '.join(expirations)}]"
+                )
+        rows = [row for row in self._listed_options() if _expiration(row) == expiry]
+        underlying = _float(rows[0].get("pDrCotVal_UA"))
+        return Options(
+            calls=_option_legs(rows, "C", underlying),
+            puts=_option_legs(rows, "P", underlying),
+            underlying={
+                "symbol": self.instrument.symbol,
+                "insCode": self.instrument.ins_code,
+                "regularMarketPrice": underlying,
+                "close": _float(rows[0].get("pClosing_UA")),
+                "previousClose": _float(rows[0].get("priceYesterday_UA")),
+                "currency": "IRR",
+            },
+        )
 
 
 class Tickers:

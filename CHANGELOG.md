@@ -4,6 +4,26 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
+## Unreleased
+
+- Added: `Ticker.cashflow` and `Ticker.quarterly_cashflow` (aliases `cash_flow`,
+  `quarterly_cash_flow`), Codal's صورت جریان های نقدی (`SheetId=9`).
+- Added: `Ticker.options` and `Ticker.option_chain(date)` from TSETMC's option market
+  watch: expirations as `YYYY-MM-DD`, then calls and puts with strike, last price, bid,
+  ask, sizes, change, volume, open interest, `inTheMoney` and contract size. `date` may be
+  Jalali. There is no implied volatility; TSETMC does not publish it.
+- Added: intraday bars for TSETMC instruments, `interval` `1m 2m 5m 15m 30m 60m 90m 1h`,
+  rebuilt from the trade feed with cancelled and repeated trades dropped; each day's bars
+  add up to TSETMC's daily count, volume and prices. The index is `Datetime` in
+  `Asia/Tehran`. One request per trading day and at most 3 months per call. Indices raise
+  `NotImplementedError`.
+- Changed: `history(interval="1h")` on a TSETMC ticker returns hourly bars instead of
+  raising `NotImplementedError`.
+- Changed: crypto `1h` bars are indexed by a tz-aware UTC `Datetime` index instead of a
+  naive UTC `Date` one, so `download()` can join them with TSETMC intraday bars.
+- Fixed: `download()` warned under pandas 3 (`Pandas4Warning`, an error under
+  `-W error::DeprecationWarning`) when its symbols had different dates.
+
 ## 2026.9.1 - 2026-09-24
 
 - Fixed: `history()` ignored capital increases that TSETMC's `GetPriceAdjustList` omits.

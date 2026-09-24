@@ -8,13 +8,14 @@ Offline unit tests replay these bodies through ``responses``; nothing in the pac
 imports this module.
 """
 
+import datetime as _dt
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from yfinance_ir import _http, set_config  # noqa: E402
+from yfinance_ir import _http, intraday, set_config  # noqa: E402
 from yfinance_ir.sources import codal, tgju, tsetmc  # noqa: E402
 
 FIXTURES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -72,6 +73,19 @@ def main() -> None:
         {"shareShareholder": tsetmc.shareholders(session, FOLAD, last_deven)},
     )
     _write("tsetmc_codal_prepared_folad.json", {"preparedData": tsetmc.codal_prepared(session, FOLAD, 5)})
+    watch = tsetmc.option_market_watch(session, 0)
+    _write(
+        "tsetmc_option_watch.json",
+        {
+            "instrumentOptMarketWatch": [r for r in watch if r["uaInsCode"] == AHROM]
+            + [r for r in watch if r["uaInsCode"] != AHROM][:6]
+        },
+    )
+    trades = intraday.fetch_trades(session, FOLAD, _dt.date(2024, 9, 30))
+    _write(
+        "tsetmc_trades_folad_20240930.json",
+        {"tradeHistory": [row for row in trades if row["hEven"] < 93000]},  # first half hour
+    )
 
     _write(
         "tgju_summary_usd.json",
@@ -90,6 +104,10 @@ def main() -> None:
     _write(
         "codal_income_folad.json",
         codal.datasource(session, letters[0]["Url"], codal.SHEET_INCOME),
+    )
+    _write(
+        "codal_cashflow_folad.json",
+        codal.datasource(session, letters[0]["Url"], codal.SHEET_CASHFLOW),
     )
 
 

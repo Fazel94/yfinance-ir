@@ -175,7 +175,7 @@ def statements(
     quarterly: bool = False,
     max_letters: int = 8,
 ) -> pd.DataFrame:
-    """Income statement (``sheet_id=1``) or balance sheet (``sheet_id=0``)."""
+    """Balance sheet, income statement or cash flow: ``codal.SHEET_BALANCE``/``_INCOME``/``_CASHFLOW``."""
     window = _default_window()
     letters = codal.letters(
         session,

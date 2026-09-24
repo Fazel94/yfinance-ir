@@ -27,8 +27,11 @@ import yfinance_ir as yf
 
 folad = yf.Ticker("فولاد")
 folad.history(period="1y")          # adjusted daily OHLCV
+folad.history(period="5d", interval="5m")   # intraday bars rebuilt from TSETMC trades
 folad.info["marketCap"]
 folad.income_stmt                   # Codal, wide, newest period first
+folad.cashflow                      # Codal cash-flow statement
+yf.Ticker("اهرم").option_chain()    # nearest expiration: calls, puts, underlying
 
 yf.download(["فولاد", "فملی"], period="6mo")
 yf.Ticker("USD").history(period="5y")   # TGJU dollar, Rial
@@ -90,14 +93,15 @@ in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 
 | Member | Source | Notes |
 |---|---|---|
-| `history(...)` | TSETMC / TGJU / SCI / crypto | daily OHLCV (monthly for CPI), adjusted by default |
+| `history(...)` | TSETMC / TGJU / SCI / crypto | daily OHLCV (monthly for CPI), adjusted by default; TSETMC also `1m`–`90m` and `1h` bars rebuilt from trades |
 | `info` | TSETMC | yfinance-style keys: `marketCap`, `trailingPE`, `sharesOutstanding`, … |
 | `dividends`, `splits`, `actions` | TSETMC adjust + share-change | see docs/conventions.md |
 | `orderbook` | TSETMC / exchange | 5 levels, bid/ask price-volume-count |
 | `client_types`, `client_type_history()` | TSETMC | individual vs institutional flow |
 | `major_holders` | TSETMC | > 1 % shareholders |
 | `news` | Codal summaries + TSETMC supervisor messages | |
-| `income_stmt`, `balance_sheet`, `quarterly_*` | Codal | wide frame, columns = period end |
+| `income_stmt`, `balance_sheet`, `cashflow`, `quarterly_*` | Codal | wide frame, columns = period end |
+| `options`, `option_chain(date)` | TSETMC option market watch | expirations; calls and puts with bid, ask, last, volume, open interest |
 | `monthly_activity()` | Codal | monthly production/sales letters |
 
 `Tickers("فولاد فملی")` bundles several tickers. `download([...])` returns the yfinance
@@ -109,7 +113,7 @@ in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 |---|---|
 | Prices | TSETMC and TGJU in Rial; `*-IRT` crypto pairs in Toman |
 | Columns | `Open High Low Close Volume Dividends "Stock Splits"`, plus TSETMC `Last`, `Value`, `Count`; `auto_adjust=False` adds `Adj Close` |
-| Dates | Gregorian `DatetimeIndex`; `start`/`end` accept Gregorian, Jalali (`1403-01-01`), `dEven` ints, `date`/`datetime`; `end` exclusive |
+| Dates | Gregorian `DatetimeIndex`; `start`/`end` accept Gregorian, Jalali (`1403-01-01`), `dEven` ints, `date`/`datetime`; `end` exclusive; intraday bars carry a tz-aware `Datetime` index, `Asia/Tehran` for TSETMC and UTC for crypto |
 | Adjustment | Dividend gaps from TSETMC `GetPriceAdjustList`; share-count changes it omits are bonus issues (`old / new`); markers land on the next bar |
 | Non-trading rows | Zero-volume calendar rows while a symbol is suspended are dropped |
 | Errors | `SymbolNotFound`, `BlockedError`, `RateLimitError`, `DataUnavailable`, all subclasses of `YFIRError` |
@@ -131,8 +135,12 @@ yf.set_config(
 
 ## Limitations
 
-- Daily bars only; `interval` other than `1d` raises `NotImplementedError` (crypto also
-  takes `1h`, CPI `1mo`).
+- Intraday bars exist for TSETMC instruments other than indices, span at most 3 months per
+  call and cost one request per trading day. Some of TSETMC's backends answer the trade feed
+  with HTTP 500 or an empty list; a failed request reconnects to reach another backend, and
+  a day still empty after 12 passes (about 3 minutes, long pauses logged at WARNING) raises
+  `DataUnavailable`. Other sources: TGJU is daily, crypto `1d`/`1h`, CPI monthly.
+- Option chains have no implied volatility or last-trade date; TSETMC publishes neither.
 - CPI downloads from `amar.org.ir` run with `verify=False` because the server omits its
   intermediate certificate.
 - ISIN lookup only hits the local cache; resolve by symbol or InsCode first.
@@ -147,8 +155,8 @@ Reasons and endpoint details: [docs/data-sources.md](docs/data-sources.md).
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev,crypto]"
 .venv/bin/python -m ruff check .
-.venv/bin/python -m pytest                   # 66 offline tests, replayed fixtures
-.venv/bin/python -m pytest -m live           # 9 smoke tests, needs an Iranian IP
+.venv/bin/python -m pytest                   # 95 offline tests, replayed fixtures
+.venv/bin/python -m pytest -m live           # 12 smoke tests, needs an Iranian IP
 .venv/bin/python tests/capture_fixtures.py   # re-record tests/fixtures/
 ```
 

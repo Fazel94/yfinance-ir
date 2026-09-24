@@ -73,12 +73,10 @@ which installs and imports in a fresh 3.10 venv.
 - [ ] Keep the as-of claims dated: the CPI base year (1400 = 100), the `ccxt-ir` 4.19.0
       breakage, and the 2026 AGM example in *Non-trading rows*.
 
-## Before tagging a release
+## Release 2026.9.1 (GitHub only)
 
-- [ ] `ruff check .` clean and `python -m pytest` at 64 passed on every CI Python.
-- [ ] `python -m build && twine check dist/*` clean.
-- [ ] Wheel installs in a fresh venv, imports, and resolves one symbol.
-- [ ] Run `pytest -m live` from an Iranian IP and record the date in the release notes as
-      the last confirmation that the upstream endpoints work.
-- [ ] Tag `v2026.9.0`, write the GitHub release, then publish to PyPI. The name
-      `yfinance-ir` was free on PyPI at audit time.
+- [x] `ruff check .` clean; `python -m pytest` 66 passed locally (3.11.12) and in CI on 3.9 to 3.13.
+- [x] `python -m build` and `twine check` clean; the wheel installs in a fresh venv, imports, and fetches `USD` from TGJU.
+- [x] `pytest -m live` passed on 2026-09-24 from an Iranian IP.
+- [x] Tagged `v2026.9.0` (`a2e3378`, no GitHub Release) and `v2026.9.1`; the `v2026.9.1` GitHub Release carries the wheel and sdist.
+- [ ] PyPI upload deferred; the upload options are in `TODO.md`.

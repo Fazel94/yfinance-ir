@@ -4,6 +4,16 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
+## Unreleased
+
+- Added: `examples/scoreboard.ipynb` and `examples/scoreboard.png`, the README's hero
+  chart: eleven TSETMC, TGJU and Nobitex assets since Nowruz 1405, each marked as ahead of
+  or behind the SCI CPI and the free-market dollar, with the same race over five years and
+  a seven-window heatmap of real and dollar returns. Charts are in Persian.
+- Changed: the `notebook` extra adds `seaborn`, `arabic-reshaper` and `python-bidi`. The
+  two shaping packages are used only under matplotlib < 3.11, which shapes Arabic script
+  itself.
+
 ## 2026.9.2 - 2026-09-24
 
 - Added: `Ticker.cashflow` and `Ticker.quarterly_cashflow` (aliases `cash_flow`,

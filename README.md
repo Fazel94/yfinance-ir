@@ -10,6 +10,15 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 
 > **Iranian IP required.** `cdn.tsetmc.com` drops foreign IPs.
 
+[![Since Nowruz 1405: which assets beat inflation and which beat the dollar](examples/scoreboard.png)](examples/scoreboard.ipynb)
+
+One `history()` call per bar: TSETMC indices, stocks and ETFs, TGJU's dollar, euro, gold
+and coin, Nobitex bitcoin, measured against the SCI CPI and the free-market dollar.
+[`examples/scoreboard.ipynb`](examples/scoreboard.ipynb) draws it, the same race as a
+path since Nowruz and over five years, and a seven-window heatmap of real and dollar
+returns. Charts are in Persian; install from `main` for its two text-shaping extras:
+`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git"`.
+
 
 ## Install
 

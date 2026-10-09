@@ -37,11 +37,14 @@ dev = ["pytest", "responses", "ruff"]
 crypto = ["ccxt-ir>=4"]
 notebook = [
     "matplotlib>=3.8",
+    "seaborn>=0.13",
     "scipy>=1.11",
     "statsmodels>=0.14",
     "backtrader>=1.9.78",
     "ipykernel",
     "nbconvert",
+    "arabic-reshaper>=3.0",
+    "python-bidi>=0.6",
 ]
 
 [project.urls]

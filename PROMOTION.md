@@ -39,13 +39,13 @@ Audit date 2026-10-11. Audience: Persian-first. Install path: GitHub release tag
       آمار؛ همان شکل yfinance»; (3) repo URL + Virgool URL + «فقط با IP ایران». Bio links
       the repo.
       URL:
-- [ ] awesome-quant PR, `Add yfinance-ir (Iranian markets: TSETMC, Codal, TGJU, SCI CPI)`,
+- [x] awesome-quant PR, `Add yfinance-ir (Iranian markets: TSETMC, Codal, TGJU, SCI CPI)`,
       entry after `swiss-finance-data` under `## Market Data & Data Sources`. No follow-up if
-      it sits.
-      URL:
-- [ ] yfinance Discussions → Show and tell, `yfinance-ir: the yfinance API shape for
-      Iranian markets (TSETMC, Codal, TGJU, CPI)`.
-      URL:
+      it sits. Opened 2026-10-11.
+      URL: https://github.com/wilsonfreitas/awesome-quant/pull/789
+- [x] yfinance Discussions → Show and tell, `yfinance-ir: the yfinance API shape for
+      Iranian markets (TSETMC, Codal, TGJU, CPI)`. Posted 2026-10-11.
+      URL: https://github.com/ranaroussi/yfinance/discussions/2993
 
 LinkedIn is optional: cross-post the monthly card with the Telegram caption and the repo
 link in the body. Not a launch item.

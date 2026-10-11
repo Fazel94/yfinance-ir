@@ -9,7 +9,12 @@ changes are named in the entry.
 - Added: `examples/scoreboard.ipynb` and `examples/scoreboard.png`, the README's hero
   chart: eleven TSETMC, TGJU and Nobitex assets since Nowruz 1405, each marked as ahead of
   or behind the SCI CPI and the free-market dollar, with the same race over five years and
-  a seven-window heatmap of real and dollar returns. Charts are in Persian.
+  a seven-window heatmap of real and dollar returns. Charts are in Persian, sized to stay
+  readable on a phone; `examples/scoreboard_linkedin.png` is the same chart as a
+  1080 × 1350 portrait card for social feeds, and `examples/scoreboard_social.png` a
+  1280 × 640 card for GitHub's social preview.
+- Added: `README.fa.md`, a Persian README, and a README section comparing yfinance-ir with
+  pytse-client, finpy-tse and tehran-stocks.
 - Changed: the `notebook` extra adds `seaborn`, `arabic-reshaper` and `python-bidi`. The
   two shaping packages are used only under matplotlib < 3.11, which shapes Arabic script
   itself.

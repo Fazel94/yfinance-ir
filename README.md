@@ -4,6 +4,8 @@
 ![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+[فارسی](README.fa.md)
+
 `yfinance`-shaped market data for the Iranian markets: TSETMC (equities, ETFs, indices),
 Codal (financial statements), TGJU (FX, gold, coins), the Statistical Centre of Iran (CPI)
 and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
@@ -18,6 +20,8 @@ and coin, Nobitex bitcoin, measured against the SCI CPI and the free-market doll
 path since Nowruz and over five years, and a seven-window heatmap of real and dollar
 returns. Charts are in Persian; install from `main` for its two text-shaping extras:
 `pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git"`.
+
+Monthly update of this chart: X [@_fazel94](https://x.com/_fazel94)
 
 
 ## Install
@@ -115,6 +119,28 @@ in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 
 `Tickers("فولاد فملی")` bundles several tickers. `download([...])` returns the yfinance
 `MultiIndex` layout: `group_by="column"` gives `(Price, Ticker)`, `group_by="ticker"` flips it.
+
+## Compared with other packages
+
+| | yfinance-ir | [pytse-client](https://github.com/Glyphack/pytse-client) | [finpy-tse](https://github.com/ARahimiQuant/finpy-tse) | [tehran-stocks](https://github.com/ghodsizadeh/tehran-stocks) |
+|---|---|---|---|---|
+| Sources | TSETMC, Codal, TGJU, SCI CPI, Nobitex (`crypto` extra) | TSETMC | TSETMC, free-market dollar | TSETMC |
+| API shape | yfinance: `Ticker(...).history()`, `download([...])` | `Ticker(...).history` frame, `download(symbols=...)` | `Get_*_History()` functions | SQLAlchemy models + CLI |
+| Adjusted daily history | dividends and capital increases | `adjust=True` | `adjust_price=True` | dividend and share tables, no adjusted series documented |
+| Intraday bars | `1m`–`90m`, `1h`, rebuilt from trades | `30s`–`1h`, aggregated from trade details (`get_trade_details(..., timeframe=)`) | trade and order-book history, no bars | — |
+| Order book, client types | yes | yes | yes | — |
+| Codal statements | income, balance sheet, cash flow, monthly activity | — | — | — |
+| Option chains | yes | — | — | — |
+| FX, gold, coin | TGJU | — | USD only (`Get_USD_RIAL`) | — |
+| CPI | SCI, monthly | — | — | — |
+| Index history | any TSETMC index by name | `FinancialIndex(...).history` | `Get_CWI_History`, `Get_EWI_History`, sector indices | — |
+| Jalali dates | input and output | `include_jdate=True` | `jalali_date=True` | output |
+| Licence | MIT | GPL-3.0 | BSD-3-Clause | MIT |
+| Last commit | 2026-10 | 2025-03 | 2024-04 | 2023-10 |
+| PyPI | not yet, install from a release tag | yes | yes | yes |
+
+Checked against each package's README on 2026-10-11; "—" means the README does not document it.
+Corrections welcome as issues.
 
 ## Conventions
 

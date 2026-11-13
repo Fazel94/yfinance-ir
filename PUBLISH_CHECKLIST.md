@@ -88,3 +88,10 @@ which installs and imports in a fresh 3.10 venv.
 - [x] `pytest -m live` 12 passed on 2026-09-24 from an Iranian IP. The market was closed (Thursday), so intraday bars of a running session are still unobserved.
 - [x] Tagged `v2026.9.2` (`5ab6fd5`); the GitHub Release carries the wheel and sdist.
 - [x] Uploaded to PyPI on 2026-11-13 with `twine upload`; a fresh venv installs `yfinance-ir==2026.9.2` from PyPI and imports it.
+
+## Release 2026.11.0 (GitHub and PyPI)
+
+- [x] `ruff check .` clean; `python -m pytest` 95 passed locally (3.11.12). Live tests not run.
+- [x] `python -m build` and `twine check` clean.
+- [x] Tagged `v2026.11.0` (`013416c`); the GitHub Release carries the wheel and sdist.
+- [x] Uploaded to PyPI on 2026-11-13; a fresh venv installs `yfinance-ir==2026.11.0` from PyPI and imports it. The PyPI description carries the RTL isolates and absolute GitHub URLs.

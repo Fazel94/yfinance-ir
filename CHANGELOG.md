@@ -4,7 +4,7 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
-## Unreleased
+## 2026.11.0 - 2026-11-13
 
 - Added: `examples/scoreboard.ipynb` and `examples/scoreboard.png`, the README's hero
   chart: eleven TSETMC, TGJU and Nobitex assets since Nowruz 1405, each marked as ahead of
@@ -18,6 +18,9 @@ changes are named in the entry.
 - Changed: the `notebook` extra adds `seaborn`, `arabic-reshaper` and `python-bidi`. The
   two shaping packages are used only under matplotlib < 3.11, which shapes Arabic script
   itself.
+- Changed: the package is on PyPI; install with `pip install yfinance-ir`. The README
+  uses absolute GitHub URLs so its links and chart work on the PyPI page, and its Persian
+  intro stays right-to-left there.
 
 ## 2026.9.2 - 2026-09-24
 

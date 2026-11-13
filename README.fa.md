@@ -17,13 +17,13 @@
 <div dir="ltr">
 
 ```bash
-pip install "yfinance-ir @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"          # TSETMC + Codal + TGJU + CPI
-pip install "yfinance-ir[crypto] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"  # adds BTC-IRT / ETH-USDT style pairs
+pip install yfinance-ir            # TSETMC + Codal + TGJU + CPI
+pip install "yfinance-ir[crypto]"  # adds BTC-IRT / ETH-USDT style pairs
 ```
 
 </div>
 
-روی PyPI نیست؛ از تگ انتشار نصب کنید. هر [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) فایل wheel و sdist را هم دارد.
+هر [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) فایل wheel و sdist را هم دارد.
 
 ## شروع سریع
 
@@ -93,7 +93,7 @@ Real   -52.0%     -13.7%
 | تاریخ جلالی | input and output | `include_jdate=True` | `jalali_date=True` | output |
 | مجوز | MIT | GPL-3.0 | BSD-3-Clause | MIT |
 | آخرین کامیت | 2026-10 | 2025-03 | 2024-04 | 2023-10 |
-| PyPI | not yet, install from a release tag | yes | yes | yes |
+| PyPI | yes | yes | yes | yes |
 
 در ۲۰۲۶-۱۰-۱۱ با README هر بسته مقایسه شده است؛ «—» یعنی README آن بسته این مورد را مستند نکرده.
 اگر خانه‌ای نادرست است، issue باز کنید.

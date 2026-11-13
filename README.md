@@ -1,10 +1,18 @@
 # yfinance-ir
 
 [![CI](https://github.com/Fazel94/yfinance-ir/actions/workflows/ci.yml/badge.svg)](https://github.com/Fazel94/yfinance-ir/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/yfinance-ir.svg)](https://pypi.org/project/yfinance-ir/)
 ![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [فارسی](README.fa.md)
+
+<div dir="rtl">
+
+داده‌های بازار ایران با رابط آشنای `yfinance`: سهام، صندوق‌ها و شاخص‌های بورس تهران (TSETMC)،
+صورت‌های مالی کدال، دلار، طلا و سکه از TGJU، تورم مرکز آمار ایران و رمزارزها از صرافی‌های ایرانی.
+
+</div>
 
 `yfinance`-shaped market data for the Iranian markets: TSETMC (equities, ETFs, indices),
 Codal (financial statements), TGJU (FX, gold, coins), the Statistical Centre of Iran (CPI)
@@ -18,8 +26,8 @@ One `history()` call per bar: TSETMC indices, stocks and ETFs, TGJU's dollar, eu
 and coin, Nobitex bitcoin, measured against the SCI CPI and the free-market dollar.
 [`examples/scoreboard.ipynb`](examples/scoreboard.ipynb) draws it, the same race as a
 path since Nowruz and over five years, and a seven-window heatmap of real and dollar
-returns. Charts are in Persian; install from `main` for its two text-shaping extras:
-`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git"`.
+returns. Charts are in Persian; install the notebook extras for its text shaping:
+`pip install "yfinance-ir[crypto,notebook]"`.
 
 Monthly update of this chart: X [@_fazel94](https://x.com/_fazel94)
 
@@ -27,11 +35,11 @@ Monthly update of this chart: X [@_fazel94](https://x.com/_fazel94)
 ## Install
 
 ```bash
-pip install "yfinance-ir @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"          # TSETMC + Codal + TGJU + CPI
-pip install "yfinance-ir[crypto] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"  # adds BTC-IRT / ETH-USDT style pairs
+pip install yfinance-ir            # TSETMC + Codal + TGJU + CPI
+pip install "yfinance-ir[crypto]"  # adds BTC-IRT / ETH-USDT style pairs
 ```
 
-Not on PyPI yet: install from a release tag. Each [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) also carries the wheel and sdist.
+Each [GitHub Release](https://github.com/Fazel94/yfinance-ir/releases) also carries the wheel and sdist.
 
 ## Quickstart
 
@@ -83,7 +91,7 @@ Real   -52.0%     -13.7%
 of *Python for Finance Cookbook* (returns, CPI deflation, outliers, stylised facts,
 SMA/Bollinger/RSI backtests with backtrader, 1/n portfolio, Monte Carlo efficient frontier)
 on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
-`pip install "yfinance-ir[crypto,notebook] @ git+https://github.com/Fazel94/yfinance-ir.git@v2026.9.2"`.
+`pip install "yfinance-ir[crypto,notebook]"`.
 
 ## Symbols
 
@@ -137,7 +145,7 @@ in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 | Jalali dates | input and output | `include_jdate=True` | `jalali_date=True` | output |
 | Licence | MIT | GPL-3.0 | BSD-3-Clause | MIT |
 | Last commit | 2026-10 | 2025-03 | 2024-04 | 2023-10 |
-| PyPI | not yet, install from a release tag | yes | yes | yes |
+| PyPI | yes | yes | yes | yes |
 
 Checked against each package's README on 2026-10-11; "—" means the README does not document it.
 Corrections welcome as issues.

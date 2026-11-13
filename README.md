@@ -22,11 +22,12 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 
 [![Since Nowruz 1405: which assets beat inflation and which beat the dollar](examples/scoreboard.png)](examples/scoreboard.ipynb)
 
-One `history()` call per bar: TSETMC indices, stocks and ETFs, TGJU's dollar, euro, gold
-and coin, Nobitex bitcoin, measured against the SCI CPI and the free-market dollar.
-[`examples/scoreboard.ipynb`](examples/scoreboard.ipynb) draws it, the same race as a
-path since Nowruz and over five years, and a seven-window heatmap of real and dollar
-returns. Charts are in Persian; install the notebook extras for its text shaping:
+Each bar comes from one `history()` call: TSETMC indices, stocks and ETFs, TGJU's dollar,
+euro, gold and coin, and Nobitex bitcoin, measured against the SCI CPI and the free-market
+dollar. [`examples/scoreboard.ipynb`](examples/scoreboard.ipynb) draws this chart. It also
+plots the same race over time, since Nowruz and over five years, and a heatmap of real and
+dollar returns over seven windows. The charts are in Persian, so install the notebook extras
+for text shaping:
 `pip install "yfinance-ir[crypto,notebook]"`.
 
 Monthly update of this chart: X [@_fazel94](https://x.com/_fazel94)
@@ -99,7 +100,7 @@ on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
 |---|---|---|
 | Persian symbol | TSETMC instrument | `Ticker("فولاد")`, `Ticker("اهرم")` |
 | Persian index name | TSETMC index | `Ticker("شاخص کل")` |
-| InsCode (10–20 digits) | TSETMC instrument | `Ticker("46348559193224090")` |
+| InsCode (10 to 20 digits) | TSETMC instrument | `Ticker("46348559193224090")` |
 | TGJU alias or slug | FX / gold / coin | `Ticker("USD")`, `Ticker("geram18")` |
 | `CPI`, `CPI_URBAN`, `CPI_RURAL` | SCI price index | `Ticker("CPI")` |
 | `BASE-IRT` / `BASE-USDT` | crypto pair | `Ticker("BTC-IRT")` |
@@ -210,9 +211,9 @@ Versions are CalVer, `YYYY.M.MICRO`. [CHANGELOG.md](CHANGELOG.md) names breaking
 the number does not encode them. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 > **Not affiliated** with yfinance, Yahoo, TSETMC, Codal, TGJU or the Statistical Centre of
-> Iran. The package reads their public endpoints and copies the `yfinance` API shape. No
-> accuracy guarantee, not investment advice; each source's terms of use are your
-> responsibility.
+> Iran. The package reads their public endpoints and copies the `yfinance` API shape. The data
+> comes with no accuracy guarantee and is not investment advice. You are responsible for
+> following each source's terms of use.
 
 ## License
 

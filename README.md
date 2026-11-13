@@ -3,9 +3,9 @@
 [![CI](https://github.com/Fazel94/yfinance-ir/actions/workflows/ci.yml/badge.svg)](https://github.com/Fazel94/yfinance-ir/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/yfinance-ir.svg)](https://pypi.org/project/yfinance-ir/)
 ![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Fazel94/yfinance-ir/blob/main/LICENSE)
 
-[فارسی](README.fa.md)
+[فارسی](https://github.com/Fazel94/yfinance-ir/blob/main/README.fa.md)
 
 <div dir="rtl" align="right">
 
@@ -20,11 +20,11 @@ and, with the `crypto` extra, Iranian crypto exchanges through `ccxt-ir`.
 
 > **Iranian IP required.** `cdn.tsetmc.com` drops foreign IPs.
 
-[![Since Nowruz 1405: which assets beat inflation and which beat the dollar](examples/scoreboard.png)](examples/scoreboard.ipynb)
+[![Since Nowruz 1405: which assets beat inflation and which beat the dollar](https://raw.githubusercontent.com/Fazel94/yfinance-ir/main/examples/scoreboard.png)](https://github.com/Fazel94/yfinance-ir/blob/main/examples/scoreboard.ipynb)
 
 Each bar comes from one `history()` call: TSETMC indices, stocks and ETFs, TGJU's dollar,
 euro, gold and coin, and Nobitex bitcoin, measured against the SCI CPI and the free-market
-dollar. [`examples/scoreboard.ipynb`](examples/scoreboard.ipynb) draws this chart. It also
+dollar. [`examples/scoreboard.ipynb`](https://github.com/Fazel94/yfinance-ir/blob/main/examples/scoreboard.ipynb) draws this chart. It also
 plots the same race over time, since Nowruz and over five years, and a heatmap of real and
 dollar returns over seven windows. The charts are in Persian, so install the notebook extras
 for text shaping:
@@ -64,7 +64,7 @@ yf.Ticker("BTC-IRT").history()          # Nobitex, needs the `crypto` extra
 
 ### Example: فولاد in Rial, USD and real terms
 
-[`examples/real_returns.py`](examples/real_returns.py) prices فولاد in TGJU dollars and
+[`examples/real_returns.py`](https://github.com/Fazel94/yfinance-ir/blob/main/examples/real_returns.py) prices فولاد in TGJU dollars and
 deflates it by the SCI CPI. Both series are forward-filled onto the stock's trading days.
 
 ```python
@@ -88,7 +88,7 @@ USD    -60.8%     -17.1%
 Real   -52.0%     -13.7%
 ```
 
-[examples/cookbook.ipynb](examples/cookbook.ipynb) runs the recipes of chapters 1, 2 and 7
+[examples/cookbook.ipynb](https://github.com/Fazel94/yfinance-ir/blob/main/examples/cookbook.ipynb) runs the recipes of chapters 1, 2 and 7
 of *Python for Finance Cookbook* (returns, CPI deflation, outliers, stylised facts,
 SMA/Bollinger/RSI backtests with backtrader, 1/n portfolio, Monte Carlo efficient frontier)
 on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
@@ -107,7 +107,7 @@ on TSETMC stocks and Nobitex crypto pairs. Install its dependencies with
 | ISIN | cache lookup only, see below | `Ticker("IRO1FOLD0009")` |
 
 Persian and Arabic spellings are unified (`ی`/`ي`, `ک`/`ك`, ZWNJ). TGJU aliases and the
-per-source rules are in [docs/data-sources.md](docs/data-sources.md). Resolutions are cached
+per-source rules are in [docs/data-sources.md](https://github.com/Fazel94/yfinance-ir/blob/main/docs/data-sources.md). Resolutions are cached
 in `~/.cache/yfinance_ir/symbols.sqlite`; `yf.cache.clear()` drops them,
 `yf.set_config(cache_dir=...)` moves them.
 
@@ -162,7 +162,7 @@ Corrections welcome as issues.
 | Non-trading rows | Zero-volume calendar rows while a symbol is suspended are dropped |
 | Errors | `SymbolNotFound`, `BlockedError`, `RateLimitError`, `DataUnavailable`, all subclasses of `YFIRError` |
 
-Full definitions: [docs/conventions.md](docs/conventions.md).
+Full definitions: [docs/conventions.md](https://github.com/Fazel94/yfinance-ir/blob/main/docs/conventions.md).
 
 ## Configuration
 
@@ -192,7 +192,7 @@ yf.set_config(
 - `ccxt-ir` 4.19.0's `fetch_ohlcv` and `fetch_order_book` are broken; Nobitex is served
   through its public REST API instead, other exchanges re-raise the ccxt error.
 
-Reasons and endpoint details: [docs/data-sources.md](docs/data-sources.md).
+Reasons and endpoint details: [docs/data-sources.md](https://github.com/Fazel94/yfinance-ir/blob/main/docs/data-sources.md).
 
 ## Development
 
@@ -207,8 +207,8 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev,crypto]"
 Offline tests run through `responses` against the exact URLs the package calls, so a wrong
 path in `yfinance_ir/sources/` fails a test instead of hitting the network.
 
-Versions are CalVer, `YYYY.M.MICRO`. [CHANGELOG.md](CHANGELOG.md) names breaking changes;
-the number does not encode them. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Versions are CalVer, `YYYY.M.MICRO`. [CHANGELOG.md](https://github.com/Fazel94/yfinance-ir/blob/main/CHANGELOG.md) names breaking changes;
+the number does not encode them. See [CONTRIBUTING.md](https://github.com/Fazel94/yfinance-ir/blob/main/CONTRIBUTING.md).
 
 > **Not affiliated** with yfinance, Yahoo, TSETMC, Codal, TGJU or the Statistical Centre of
 > Iran. The package reads their public endpoints and copies the `yfinance` API shape. The data
@@ -217,4 +217,4 @@ the number does not encode them. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT, Copyright (c) 2026 Kiyarash Fazeli. See [LICENSE](LICENSE).
+MIT, Copyright (c) 2026 Kiyarash Fazeli. See [LICENSE](https://github.com/Fazel94/yfinance-ir/blob/main/LICENSE).

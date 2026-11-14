@@ -4,6 +4,11 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
+## 2026.11.1 - 2026-11-14
+
+- Changed: the README and the PyPI sidebar link the author's sites: fin.nlogn.ir (the
+  scoreboard as a web page), the kialog and kiablog blogs, and nlogn.ir. No code changes.
+
 ## 2026.11.0 - 2026-11-13
 
 - Added: `examples/scoreboard.ipynb` and `examples/scoreboard.png`, the README's hero

@@ -215,6 +215,11 @@ the number does not encode them. See [CONTRIBUTING.md](https://github.com/Fazel9
 > comes with no accuracy guarantee and is not investment advice. You are responsible for
 > following each source's terms of use.
 
+## Author
+
+Built by [Kiyarash Fazeli](https://kiya.nlogn.ir/). Writing on [kialog](https://kialog.nlogn.ir/) (English) and
+[kiablog](https://kiablog.nlogn.ir/) (Persian). More projects at [nlogn.ir](https://nlogn.ir/).
+
 ## License
 
 MIT, Copyright (c) 2026 Kiyarash Fazeli. See [LICENSE](https://github.com/Fazel94/yfinance-ir/blob/main/LICENSE).

@@ -108,6 +108,11 @@ Real   -52.0%     -13.7%
 جدول کامل API در [README انگلیسی](README.md)، قواعد در [docs/conventions.md](docs/conventions.md) و
 جزئیات منابع در [docs/data-sources.md](docs/data-sources.md).
 
+## نویسنده
+
+ساختهٔ [کیارش فاضلی](https://kiya.nlogn.ir/). نوشته‌ها در [kiablog](https://kiablog.nlogn.ir/) (فارسی) و
+[kialog](https://kialog.nlogn.ir/) (انگلیسی). پروژه‌های بیشتر در [nlogn.ir](https://nlogn.ir/).
+
 > **وابسته نیست** به yfinance، Yahoo، TSETMC، کدال، TGJU یا مرکز آمار ایران. این بسته از endpointهای
 > عمومی آن‌ها می‌خواند و شکل API بستهٔ `yfinance` را تقلید می‌کند. درستی داده‌ها تضمین نمی‌شود و
 > توصیهٔ سرمایه‌گذاری نیست؛ رعایت شرایط استفادهٔ هر منبع بر عهدهٔ شماست.

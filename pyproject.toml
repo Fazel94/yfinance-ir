@@ -54,6 +54,9 @@ Issues = "https://github.com/Fazel94/yfinance-ir/issues"
 Changelog = "https://github.com/Fazel94/yfinance-ir/blob/main/CHANGELOG.md"
 Author = "https://kiya.nlogn.ir/"
 Blog = "https://kialog.nlogn.ir/"
+"Blog (Persian)" = "https://kiablog.nlogn.ir/"
+"Asset tracker" = "https://fin.nlogn.ir/"
+"More projects" = "https://nlogn.ir/"
 
 [tool.setuptools.dynamic]
 version = { attr = "yfinance_ir.__version__" }

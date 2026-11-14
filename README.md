@@ -30,7 +30,8 @@ dollar returns over seven windows. The charts are in Persian, so install the not
 for text shaping:
 `pip install "yfinance-ir[crypto,notebook]"`.
 
-Monthly update of this chart: X [@_fazel94](https://x.com/_fazel94)
+The chart is redrawn every month and posted on X as [@_fazel94](https://x.com/_fazel94).
+[fin.nlogn.ir](https://fin.nlogn.ir/) has the same comparison as a web page.
 
 
 ## Install
@@ -217,8 +218,9 @@ the number does not encode them. See [CONTRIBUTING.md](https://github.com/Fazel9
 
 ## Author
 
-Built by [Kiyarash Fazeli](https://kiya.nlogn.ir/). Writing on [kialog](https://kialog.nlogn.ir/) (English) and
-[kiablog](https://kiablog.nlogn.ir/) (Persian). More projects at [nlogn.ir](https://nlogn.ir/).
+Built by Kiyarash Fazeli ([kiya.nlogn.ir](https://kiya.nlogn.ir/)). He writes in English on
+[kialog](https://kialog.nlogn.ir/) and in Persian on [kiablog](https://kiablog.nlogn.ir/).
+[nlogn.ir](https://nlogn.ir/) lists his other sites and projects.
 
 ## License
 

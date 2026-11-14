@@ -95,3 +95,10 @@ which installs and imports in a fresh 3.10 venv.
 - [x] `python -m build` and `twine check` clean.
 - [x] Tagged `v2026.11.0` (`013416c`); the GitHub Release carries the wheel and sdist.
 - [x] Uploaded to PyPI on 2026-11-13; a fresh venv installs `yfinance-ir==2026.11.0` from PyPI and imports it. The PyPI description carries the RTL isolates and absolute GitHub URLs.
+
+## Release 2026.11.1 (GitHub and PyPI)
+
+- [x] README and project URLs only. `ruff check .` clean; `python -m pytest` 95 passed locally (3.11.12). Live tests not run.
+- [x] `python -m build` and `twine check` clean.
+- [x] Tagged `v2026.11.1` (`c6e20a9`); the GitHub Release carries the wheel and sdist.
+- [x] Uploaded to PyPI on 2026-11-14.

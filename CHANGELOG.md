@@ -4,6 +4,11 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
+## 2026.11.2 - 2026-11-21
+
+- Changed: the scoreboard web page moved to yfin.ir; the README and the PyPI sidebar link
+  it there (fin.nlogn.ir 301-redirects). No code changes.
+
 ## 2026.11.1 - 2026-11-14
 
 - Changed: the README and the PyPI sidebar link the author's sites: fin.nlogn.ir (the

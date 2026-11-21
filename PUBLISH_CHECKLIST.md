@@ -102,3 +102,10 @@ which installs and imports in a fresh 3.10 venv.
 - [x] `python -m build` and `twine check` clean.
 - [x] Tagged `v2026.11.1` (`c6e20a9`); the GitHub Release carries the wheel and sdist.
 - [x] Uploaded to PyPI on 2026-11-14.
+
+## Release 2026.11.2 (GitHub and PyPI)
+
+- [x] README and project URLs only (asset tracker moved to yfin.ir). `ruff check .` clean; `python -m pytest` 95 passed locally (3.11.12). Live tests not run.
+- [x] `python -m build` and `twine check` clean.
+- [x] Tagged `v2026.11.2` (`ec30477`); the GitHub Release carries the wheel and sdist.
+- [x] Uploaded to PyPI on 2026-11-21; the PyPI JSON API reports 2026.11.2 with the `https://yfin.ir/` link.

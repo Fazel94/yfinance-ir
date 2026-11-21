@@ -31,7 +31,7 @@ for text shaping:
 `pip install "yfinance-ir[crypto,notebook]"`.
 
 The chart is redrawn every month and posted on X as [@_fazel94](https://x.com/_fazel94).
-[fin.nlogn.ir](https://fin.nlogn.ir/) has the same comparison as a web page.
+[yfin.ir](https://yfin.ir/) has the same comparison as a web page.
 
 
 ## Install

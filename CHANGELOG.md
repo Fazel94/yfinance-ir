@@ -4,6 +4,16 @@ Versions are CalVer, `YYYY.M.MICRO`: the year and month of the release, then a c
 for further releases in that month. The number records the release date. Breaking
 changes are named in the entry.
 
+## 2026.11.3 - 2026-11-23
+
+- Fixed: crypto daily history went back only 500 bars (Nobitex's UDF feed answers with the
+  latest 500 bars of the asked range). It is now paged backwards: `BTC-IRT` reaches
+  2018-03-02.
+- Added: Wallex history through its UDF feed (`set_config(crypto_exchange="wallex")`),
+  e.g. `USDT-IRT` from 2018-11-27, which Nobitex's feed refuses with HTTP 403.
+- Changed: on Nobitex and Wallex, `ohlcv` reads the UDF feed directly instead of first
+  calling ccxt-ir's `fetch_ohlcv`.
+
 ## 2026.11.2 - 2026-11-21
 
 - Changed: the scoreboard web page moved to yfin.ir; the README and the PyPI sidebar link

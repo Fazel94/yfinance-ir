@@ -109,3 +109,10 @@ which installs and imports in a fresh 3.10 venv.
 - [x] `python -m build` and `twine check` clean.
 - [x] Tagged `v2026.11.2` (`ec30477`); the GitHub Release carries the wheel and sdist.
 - [x] Uploaded to PyPI on 2026-11-21; the PyPI JSON API reports 2026.11.2 with the `https://yfin.ir/` link.
+
+## Release 2026.11.3 (GitHub tag and PyPI)
+
+- [x] Crypto history paged backwards; Wallex UDF feed. `ruff check .` clean; `python -m pytest` 96 passed locally (3.11.12). Live check: `BTC-IRT` from 2018-03-02 (Nobitex), `USDT-IRT` from 2018-11-27 (Wallex).
+- [x] `python -m build` and `twine check` clean.
+- [x] Tagged `v2026.11.3` (`ce7f8a1`) and pushed. No GitHub Release page created.
+- [x] Uploaded to PyPI on 2026-11-23; the PyPI JSON API reports 2026.11.3 with the wheel and sdist.

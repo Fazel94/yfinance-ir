@@ -51,6 +51,13 @@ def test_pair_is_translated_to_a_ccxt_symbol():
 
 
 def test_ohlcv_pages_until_the_exchange_stops_and_dedupes(fake_ccxt):
+    from yfinance_ir.config import set_config
+
+    class Ramzinex(FakeExchange):  # no UDF feed, so ccxt's fetch_ohlcv is used
+        id = "ramzinex"
+
+    fake_ccxt.ramzinex = Ramzinex
+    set_config(crypto_exchange="ramzinex")
     rows = crypto.ohlcv("BTC-IRT", limit=5)
 
     assert len(rows) == 10  # two full pages, then an empty one stops the loop
@@ -109,19 +116,45 @@ def broken_ccxt(monkeypatch):
     crypto._exchanges.clear()
 
 
-def test_ohlcv_falls_back_to_the_nobitex_udf_feed(broken_ccxt, api):
-    api.mock.add(
-        "GET",
-        "https://apiv2.nobitex.ir/market/udf/history",
-        json={"s": "ok", "t": [1787000000, 1787086400], "o": [1, 2], "h": [3, 4],
-              "l": [0.5, 1.5], "c": [2, 3], "v": [10, 20]},
-    )
+def test_ohlcv_falls_back_to_the_nobitex_udf_feed_and_pages_backwards(broken_ccxt, api):
+    url = "https://apiv2.nobitex.ir/market/udf/history"
+    api.mock.add("GET", url, json={"s": "ok", "t": [1787086400, 1787172800], "o": [2, 3],
+                                   "h": [4, 5], "l": [1.5, 2.5], "c": [3, 4], "v": [20, 30]})
+    api.mock.add("GET", url, json={"s": "ok", "t": [1787000000], "o": [1], "h": [3],
+                                   "l": [0.5], "c": [2], "v": [10]})
+    api.mock.add("GET", url, json={"s": "no_data"})
 
     rows = crypto.ohlcv("BTC-IRT")
 
-    assert [row[0] for row in rows] == [1787000000000, 1787086400000]
+    assert [row[0] for row in rows] == [1787000000000, 1787086400000, 1787172800000]
     assert rows[0][1:] == [1.0, 3.0, 0.5, 2.0, 10.0]
     assert "symbol=BTCIRT" in api.mock.calls[0].request.url  # not ccxt's `btc-rls` id
+    assert "to=1787086399" in api.mock.calls[1].request.url  # the next page ends before the first bar
+    assert len(api.mock.calls) == 3
+
+
+def test_wallex_history_reads_its_own_udf_feed_and_toman_pair(monkeypatch, api):
+    class Wallex(BrokenExchange):
+        id = "wallex"
+        urls = {"api": {"public": "https://api.wallex.ir"}}
+
+        def load_markets(self):
+            return {"USDT/IRT": {}}
+
+    module = types.ModuleType("ccxt")
+    module.wallex = Wallex
+    monkeypatch.setitem(sys.modules, "ccxt", module)
+    crypto._exchanges.clear()
+    from yfinance_ir.config import set_config
+
+    set_config(crypto_exchange="wallex")
+    api.mock.add("GET", "https://api.wallex.ir/v1/udf/history",
+                 json={"s": "ok", "t": [1787000000], "o": [1], "h": [3], "l": [0.5], "c": [2], "v": [10]})
+
+    rows = crypto.ohlcv("USDT-IRT")
+
+    assert [row[4] for row in rows] == [2.0]
+    assert "symbol=USDTTMN" in api.mock.calls[0].request.url
 
 
 def test_orderbook_falls_back_and_converts_rial_to_toman(broken_ccxt, api):
@@ -139,17 +172,17 @@ def test_orderbook_falls_back_and_converts_rial_to_toman(broken_ccxt, api):
     assert book.loc[1, "ask_price"] == 18_570_000_000.0
 
 
-def test_a_non_nobitex_exchange_reraises_the_ccxt_bug(monkeypatch):
-    class Wallex(BrokenExchange):
-        id = "wallex"
+def test_an_exchange_without_a_known_feed_reraises_the_ccxt_bug(monkeypatch):
+    class Ramzinex(BrokenExchange):
+        id = "ramzinex"
 
     module = types.ModuleType("ccxt")
-    module.wallex = Wallex
+    module.ramzinex = Ramzinex
     monkeypatch.setitem(sys.modules, "ccxt", module)
     crypto._exchanges.clear()
     from yfinance_ir.config import set_config
 
-    set_config(crypto_exchange="wallex")
+    set_config(crypto_exchange="ramzinex")
     with pytest.raises(NameError):
         crypto.ohlcv("BTC-IRT")
 

@@ -78,7 +78,11 @@ the one-day TTL.
 
 - Pairs `BASE-IRT` / `BASE-USDT`; `*-IRT` quoted in Toman (see docs/conventions.md, Prices).
 - `ccxt-ir` 4.19.0 is partly broken. `fetch_ohlcv` raises
-  `NameError: name 'Date' is not defined` on *every* exchange and `fetch_order_book`
-  raises a `TypeError`. Both are routed around using Nobitex's public REST API
-  (`/market/udf/history`, `/v3/orderbook/{PAIR}`) discovered from ccxt's own
-  `urls["api"]["public"]`. Other exchanges re-raise the ccxt error.
+  `NameError: name 'Date' is not defined` on Nobitex (and answers `[]` on Wallex), and
+  `fetch_order_book` raises a `TypeError`. History on Nobitex and Wallex reads their
+  TradingView UDF feed instead (`/market/udf/history` pair `BTCIRT`, `/v1/udf/history` pair
+  `BTCTMN`), from ccxt's own `urls["api"]["public"]`. One answer holds only the latest
+  400-500 bars of the asked range, so the history is paged backwards until the feed says
+  `no_data`. Depth uses Nobitex's `/v3/orderbook/{PAIR}`. Other exchanges re-raise the ccxt error.
+- Nobitex's UDF feed answers 403 for `USDTIRT`; read Tether from Wallex
+  (`set_config(crypto_exchange="wallex")`, history from 2018-11-27).

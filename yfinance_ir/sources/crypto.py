@@ -8,12 +8,14 @@ methods are broken in the pinned release and are routed around here:
   exchange (4.19.0 ships an untranspiled ``Date.now()``), and
 * ``fetch_order_book`` raises ``TypeError: unsupported operand type(s) for /: 'str'``.
 
-So OHLCV and depth fall back to Nobitex's public REST API, whose base URL is read from
-ccxt's own ``urls["api"]["public"]`` (``https://apiv2.nobitex.ir``) instead of being
-hardcoded: ``/market/udf/history`` (TradingView UDF; Rial prices, same scale as
-``fetch_ticker``) and ``/v3/orderbook/{PAIR}``. The UDF pair id is ``BTCIRT``-style,
-which is *not* ccxt's market id (``btc-rls``), so it is rebuilt from base/quote.
-A non-Nobitex exchange re-raises the original ccxt error rather than guessing at its API.
+So on Nobitex and Wallex OHLCV skips ccxt (Wallex's ``fetch_ohlcv`` answers ``[]``) and depth
+falls back to the exchange's public REST API, whose base URL is read from ccxt's own
+``urls["api"]["public"]`` instead of being hardcoded. OHLCV reads the TradingView UDF feed of
+Nobitex (``/market/udf/history``, pair ``BTCIRT``) or Wallex (``/v1/udf/history``, pair
+``BTCTMN``), both in Toman, the scale of ``fetch_ticker``. The feed caps one answer at the
+latest 400-500 bars of the asked range, so history is paged backwards. The UDF pair id is not
+ccxt's market id (``btc-rls``), so it is rebuilt from base/quote. Depth uses Nobitex's
+``/v3/orderbook/{PAIR}``. Any other exchange gets ccxt's own error rather than a guessed API.
 """
 
 import datetime as _dt
@@ -31,6 +33,8 @@ _INSTALL_HINT = "crypto support requires: pip install yfinance-ir[crypto]"
 _DEFAULT_SINCE = _dt.date(2018, 1, 1)
 _RIAL_QUOTES = {"IRT", "IRR", "RLS"}
 _UDF_RESOLUTION = {"1d": "D", "1h": "60", "1m": "1"}
+#: exchange id -> (UDF history path, the feed's suffix for a Toman/Rial quote)
+_UDF_FEEDS = {"nobitex": ("/market/udf/history", "IRT"), "wallex": ("/v1/udf/history", "TMN")}
 
 _exchanges: Dict[str, object] = {}
 
@@ -82,7 +86,8 @@ def _udf_pair(client, symbol: str) -> str:
     market = client.market(symbol)
     base = (market.get("base") or symbol.partition("/")[0]).upper()
     quote = (market.get("quote") or symbol.partition("/")[2]).upper()
-    return base + ("IRT" if quote in _RIAL_QUOTES else quote)
+    rial_suffix = _UDF_FEEDS.get(client.id, _UDF_FEEDS["nobitex"])[1]
+    return base + (rial_suffix if quote in _RIAL_QUOTES else quote)
 
 
 def _nobitex_only(client, exc: Exception) -> None:
@@ -94,21 +99,29 @@ def _udf_ohlcv(client, symbol: str, since_ms: int, timeframe: str) -> List[list]
     resolution = _UDF_RESOLUTION.get(timeframe)
     if resolution is None:
         raise DataUnavailable(0, "", f"unsupported crypto timeframe: {timeframe!r}")
-    params = {
-        "symbol": _udf_pair(client, symbol),
-        "resolution": resolution,
-        "from": since_ms // 1000,
-        "to": int(_dt.datetime.now().timestamp()),
-    }
-    payload = get(new_session(), f"{_public_base(client)}/market/udf/history", params=params).json()
-    if payload.get("s") != "ok" or not payload.get("t"):
-        return []
-    return [
-        [int(t) * 1000, float(o), float(h), float(low), float(c), float(v)]
-        for t, o, h, low, c, v in zip(
-            payload["t"], payload["o"], payload["h"], payload["l"], payload["c"], payload["v"]
-        )
-    ]
+    url = _public_base(client) + _UDF_FEEDS[client.id][0]
+    pair = _udf_pair(client, symbol)
+    session = new_session()
+    since = since_ms // 1000
+    to = int(_dt.datetime.now().timestamp())
+    rows: List[list] = []
+    while to >= since:  # each answer is the latest bars of [since, to]; walk `to` back past them
+        params = {"symbol": pair, "resolution": resolution, "from": since, "to": to}
+        payload = get(session, url, params=params).json()
+        if payload.get("s") != "ok" or not payload.get("t"):
+            break
+        page = [
+            [int(t) * 1000, float(o), float(h), float(low), float(c), float(v)]
+            for t, o, h, low, c, v in zip(
+                payload["t"], payload["o"], payload["h"], payload["l"], payload["c"], payload["v"]
+            )
+        ]
+        first = int(payload["t"][0])
+        if first > to:  # an answer outside the asked range: stop rather than loop
+            break
+        rows = page + rows
+        to = first - 1
+    return rows
 
 
 def ohlcv(
@@ -123,17 +136,15 @@ def ohlcv(
     symbol = _require_market(client, to_ccxt_symbol(pair), pair)
     start = since or _DEFAULT_SINCE
     since_ms = int(_dt.datetime(start.year, start.month, start.day).timestamp() * 1000)
+    if client.id in _UDF_FEEDS:  # ccxt-ir's fetch_ohlcv raises on Nobitex and returns [] on Wallex
+        return _udf_ohlcv(client, symbol, since_ms, timeframe)
     now_ms = int(_dt.datetime.now().timestamp() * 1000)
 
     rows: List[list] = []
     seen = set()
     cursor = since_ms
     while True:
-        try:
-            page = client.fetch_ohlcv(symbol, timeframe, cursor, limit)
-        except (NameError, TypeError, AttributeError) as exc:  # ccxt-ir transpilation bugs
-            _nobitex_only(client, exc)
-            return _udf_ohlcv(client, symbol, since_ms, timeframe)
+        page = client.fetch_ohlcv(symbol, timeframe, cursor, limit)
         if not page:
             break
         for candle in page:

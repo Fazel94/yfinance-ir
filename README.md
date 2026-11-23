@@ -190,8 +190,9 @@ yf.set_config(
   intermediate certificate.
 - ISIN lookup only hits the local cache; resolve by symbol or InsCode first.
 - Index history has no open or volume.
-- `ccxt-ir` 4.19.0's `fetch_ohlcv` and `fetch_order_book` are broken; Nobitex is served
-  through its public REST API instead, other exchanges re-raise the ccxt error.
+- `ccxt-ir` 4.19.0's `fetch_ohlcv` and `fetch_order_book` are broken; Nobitex and Wallex
+  history and Nobitex depth come from their public REST APIs instead, other exchanges
+  re-raise the ccxt error. Tether: Nobitex refuses `USDT-IRT` history, Wallex serves it.
 
 Reasons and endpoint details: [docs/data-sources.md](https://github.com/Fazel94/yfinance-ir/blob/main/docs/data-sources.md).
 
